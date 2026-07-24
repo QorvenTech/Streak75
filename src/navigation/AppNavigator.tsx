@@ -11,9 +11,9 @@ import { StyleSheet } from 'react-native';
 import { colors, fonts } from '../constants/theme';
 import { BunkMeterScreen } from '../screens/BunkMeterScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
+import { ColorCustomizationScreen } from '../screens/ColorCustomizationScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
-import { PlaceholderDetailScreen } from '../screens/PlaceholderDetailScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SubjectDetailScreen } from '../screens/SubjectDetailScreen';
 import { RootStackParamList, TabParamList } from './types';
@@ -86,7 +86,7 @@ export function AppNavigator() {
         <Stack.Screen name="SubjectDetail" component={SubjectDetailScreen} />
         <Stack.Screen
           name="ColorCustomization"
-          component={PlaceholderDetailScreen}
+          component={ColorCustomizationScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

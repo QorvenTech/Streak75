@@ -1,11 +1,307 @@
-import { PlaceholderTabScreen } from './PlaceholderTabScreen';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+
+import { Card } from '../components/Card';
+import { Screen } from '../components/Screen';
+import { SettingsRow } from '../components/SettingsRow';
+import { colors, fonts, radii } from '../constants/theme';
+import { RootStackParamList, TabParamList } from '../navigation/types';
+import { useApp } from '../store/AppProvider';
+
+type ProfileNavigation = CompositeNavigationProp<
+  BottomTabNavigationProp<TabParamList, 'Profile'>,
+  NativeStackNavigationProp<RootStackParamList>
+>;
 
 export function ProfileScreen() {
+  const navigation = useNavigation<ProfileNavigation>();
+  const { profile, settings, subjects } = useApp();
+
   return (
-    <PlaceholderTabScreen
-      title="Profile & Settings"
-      subtitle="Cloud backup, reminders, targets, and exports live here."
-      icon="account-circle-outline"
-    />
+    <Screen>
+      <View style={styles.header}>
+        <Text style={styles.title}>Profile</Text>
+        <Text style={styles.subtitle}>Your attendance command centre.</Text>
+      </View>
+
+      <Card style={styles.profileCard}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>
+            {(profile.displayName || 'S').slice(0, 1).toUpperCase()}
+          </Text>
+        </View>
+        <View style={styles.profileCopy}>
+          <Text style={styles.name}>{profile.displayName}</Text>
+          <Text style={styles.email}>{profile.email ?? 'Local-only student profile'}</Text>
+          <View style={styles.modePill}>
+            <View
+              style={[
+                styles.modeDot,
+                {
+                  backgroundColor:
+                    profile.authMode === 'signed-in' ? colors.success : colors.warning,
+                },
+              ]}
+            />
+            <Text style={styles.modeText}>
+              {profile.authMode === 'signed-in' ? 'Google connected' : 'Backup not connected'}
+            </Text>
+          </View>
+        </View>
+      </Card>
+
+      <View style={styles.stats}>
+        <Card style={styles.stat}>
+          <Text style={styles.statValue}>{subjects.length}</Text>
+          <Text style={styles.statLabel}>Subjects</Text>
+        </Card>
+        <Card style={styles.stat}>
+          <Text style={[styles.statValue, { color: colors.lime }]}>
+            {settings.targetPercentage}%
+          </Text>
+          <Text style={styles.statLabel}>Target</Text>
+        </Card>
+        <Card style={styles.stat}>
+          <Text style={[styles.statValue, { color: colors.cyan }]}>
+            {settings.notifications.reminderTime}
+          </Text>
+          <Text style={styles.statLabel}>Reminder</Text>
+        </Card>
+      </View>
+
+      <Text style={styles.sectionTitle}>Personalize</Text>
+      <View style={styles.rows}>
+        <SettingsRow
+          icon="palette-outline"
+          iconColor={colors.lime}
+          title="Attendance colors & target"
+          subtitle="Customize labels, thresholds, reminders, and reports."
+          onPress={() => navigation.navigate('ColorCustomization')}
+        />
+        <SettingsRow
+          icon="weather-night"
+          iconColor={colors.purple}
+          title="Appearance"
+          subtitle="Dark mode is always on — focused and battery friendly."
+          right={<Text style={styles.darkOnly}>Dark only</Text>}
+        />
+      </View>
+
+      <Text style={styles.sectionTitle}>Backup & sync</Text>
+      <View style={styles.rows}>
+        <SettingsRow
+          icon={profile.authMode === 'signed-in' ? 'google' : 'google'}
+          iconColor={colors.blue}
+          title={profile.authMode === 'signed-in' ? 'Signed in with Google' : 'Sign in with Google'}
+          subtitle={
+            profile.authMode === 'signed-in'
+              ? profile.email ?? 'Cloud backup enabled'
+              : 'Keep local tracking now; connect for cloud backup.'
+          }
+          onPress={() =>
+            Alert.alert(
+              'Google backup',
+              'Google Sign-In is connected in the Firebase integration milestone.',
+            )
+          }
+        />
+        <SettingsRow
+          icon="cloud-sync-outline"
+          title="Sync now"
+          subtitle={
+            profile.lastSyncedAt
+              ? `Last synced ${profile.lastSyncedAt}`
+              : 'Your local records are safe on this device.'
+          }
+          onPress={() =>
+            Alert.alert(
+              profile.authMode === 'signed-in' ? 'Sync requested' : 'Sign in required',
+              profile.authMode === 'signed-in'
+                ? 'Cloud sync will start shortly.'
+                : 'Attendance remains available offline. Sign in only when you want backup.',
+            )
+          }
+        />
+      </View>
+
+      <Text style={styles.sectionTitle}>Data & reports</Text>
+      <View style={styles.rows}>
+        <SettingsRow
+          icon="file-export-outline"
+          iconColor={colors.success}
+          title="Export attendance"
+          subtitle="Download all subjects as PDF or Excel."
+          onPress={() => navigation.navigate('ColorCustomization')}
+        />
+        <SettingsRow
+          icon="shield-lock-outline"
+          iconColor={colors.cyan}
+          title="Privacy"
+          subtitle="Your cloud data is protected by per-user Firestore rules."
+          onPress={() =>
+            Alert.alert(
+              'Privacy by design',
+              'Local records stay on your device. Cloud records are readable only by your signed-in Firebase account.',
+            )
+          }
+        />
+      </View>
+
+      <View style={styles.brandFooter}>
+        <View style={styles.brandIcon}>
+          <MaterialCommunityIcons name="shield-check-outline" color={colors.lime} size={23} />
+        </View>
+        <View>
+          <Text style={styles.brandName}>Streak75 · v1.0.0</Text>
+          <Text style={styles.brandTagline}>Track. Analyze. Achieve.</Text>
+        </View>
+      </View>
+    </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    minHeight: 76,
+    justifyContent: 'center',
+  },
+  title: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 23,
+  },
+  subtitle: {
+    marginTop: 2,
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 10.5,
+  },
+  profileCard: {
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+  },
+  avatar: {
+    width: 61,
+    height: 61,
+    borderRadius: 21,
+    borderWidth: 2,
+    borderColor: colors.lime,
+    backgroundColor: `${colors.lime}16`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: colors.lime,
+    fontFamily: fonts.bold,
+    fontSize: 25,
+  },
+  profileCopy: {
+    flex: 1,
+  },
+  name: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 17,
+  },
+  email: {
+    marginTop: 1,
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 9.5,
+  },
+  modePill: {
+    alignSelf: 'flex-start',
+    marginTop: 7,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: radii.pill,
+    backgroundColor: colors.surfaceSoft,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  modeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  modeText: {
+    color: colors.textSecondary,
+    fontFamily: fonts.medium,
+    fontSize: 8,
+  },
+  stats: {
+    marginVertical: 10,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  stat: {
+    flex: 1,
+    minHeight: 76,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statValue: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 19,
+  },
+  statLabel: {
+    color: colors.muted,
+    fontFamily: fonts.medium,
+    fontSize: 8.5,
+    textTransform: 'uppercase',
+  },
+  sectionTitle: {
+    marginTop: 9,
+    marginBottom: 7,
+    color: colors.text,
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+  },
+  rows: {
+    gap: 7,
+  },
+  darkOnly: {
+    color: colors.purple,
+    fontFamily: fonts.semiBold,
+    fontSize: 10,
+  },
+  brandFooter: {
+    marginTop: 20,
+    paddingTop: 17,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+  },
+  brandIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: `${colors.lime}12`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandName: {
+    color: colors.textSecondary,
+    fontFamily: fonts.semiBold,
+    fontSize: 10,
+  },
+  brandTagline: {
+    color: colors.cyan,
+    fontFamily: fonts.medium,
+    fontSize: 8,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+  },
+});
