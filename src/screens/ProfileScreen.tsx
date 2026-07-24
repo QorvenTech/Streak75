@@ -11,6 +11,7 @@ import { SettingsRow } from '../components/SettingsRow';
 import { colors, fonts, radii } from '../constants/theme';
 import { RootStackParamList, TabParamList } from '../navigation/types';
 import {
+  EXPO_GO_CLOUD_MESSAGE,
   isCloudConfigured,
   readableCloudError,
   signInWithGoogle,
@@ -33,8 +34,8 @@ export function ProfileScreen() {
   const handleGoogleAccount = async () => {
     if (!isCloudConfigured()) {
       Alert.alert(
-        'Firebase setup required',
-        'Add the two Firebase service files, set your Google web client ID, and build the development client. Local attendance is fully available meanwhile.',
+        'Expo Go test mode',
+        EXPO_GO_CLOUD_MESSAGE,
       );
       return;
     }
@@ -166,11 +167,15 @@ export function ProfileScreen() {
         <SettingsRow
           icon={profile.authMode === 'signed-in' ? 'google' : 'google'}
           iconColor={colors.blue}
-          title={profile.authMode === 'signed-in' ? 'Signed in with Google' : 'Sign in with Google'}
+          title={
+            profile.authMode === 'signed-in'
+              ? 'Signed in with Google'
+              : 'Google Sign-In unavailable in Expo Go'
+          }
           subtitle={
             profile.authMode === 'signed-in'
               ? profile.email ?? 'Cloud backup enabled'
-              : 'Keep local tracking now; connect for cloud backup.'
+              : 'Use the launch branch and a development build for cloud backup.'
           }
           onPress={handleGoogleAccount}
           right={

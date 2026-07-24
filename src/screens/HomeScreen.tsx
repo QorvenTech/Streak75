@@ -13,6 +13,7 @@ import { AddSubjectModal } from '../components/AddSubjectModal';
 import { AppHeader } from '../components/AppHeader';
 import { Card } from '../components/Card';
 import { CircularProgress } from '../components/CircularProgress';
+import { ExpoGoTestBanner } from '../components/ExpoGoTestBanner';
 import { NoteEditorModal } from '../components/NoteEditorModal';
 import { QuickAction } from '../components/QuickAction';
 import { Screen } from '../components/Screen';
@@ -69,6 +70,7 @@ export function HomeScreen() {
           )
         }
       />
+      <ExpoGoTestBanner />
 
       <Card style={styles.summaryCard}>
         <View style={styles.summaryHeading}>

@@ -381,14 +381,14 @@ export function ColorCustomizationScreen({ navigation }: Props) {
         subtitle={
           profile.authMode === 'signed-in'
             ? `Last synced ${profile.lastSyncedAt ?? 'just now'}`
-            : 'Sign in from Profile to back up your data.'
+            : 'Cloud backup is disabled in the Expo Go test branch.'
         }
         onPress={() =>
           Alert.alert(
             'Backup & sync',
             profile.authMode === 'signed-in'
               ? 'Manual sync will run after Firebase credentials are configured.'
-              : 'Open Profile to connect Google backup.',
+              : 'Switch to the launch branch and use a development build to test Google backup.',
           )
         }
       />

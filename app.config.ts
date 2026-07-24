@@ -1,14 +1,4 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-
-const androidFirebaseFile =
-  process.env.GOOGLE_SERVICES_JSON ?? './firebase/android/google-services.json';
-const iosFirebaseFile =
-  process.env.GOOGLE_SERVICE_INFO_PLIST ?? './firebase/ios/GoogleService-Info.plist';
-
-const hasFirebaseFiles =
-  existsSync(resolve(androidFirebaseFile)) && existsSync(resolve(iosFirebaseFile));
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -24,14 +14,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.qorventech.streak75',
-    ...(hasFirebaseFiles ? { googleServicesFile: iosFirebaseFile } : {}),
-    infoPlist: {
-      UIBackgroundModes: ['remote-notification'],
-    },
   },
   android: {
     package: 'com.qorventech.streak75',
-    ...(hasFirebaseFiles ? { googleServicesFile: androidFirebaseFile } : {}),
     adaptiveIcon: {
       foregroundImage: './assets/android-icon-foreground.png',
       backgroundImage: './assets/android-icon-background.png',
@@ -45,7 +30,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundler: 'metro',
   },
   plugins: [
-    'expo-dev-client',
     [
       'expo-notifications',
       {
@@ -54,20 +38,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         defaultChannel: 'attendance-reminders',
       },
     ],
-    'expo-sharing',
     [
       'expo-file-system',
       {
         enableFileSharing: true,
         supportsOpeningDocumentsInPlace: true,
-      },
-    ],
-    '@react-native-community/datetimepicker',
-    [
-      'expo-build-properties',
-      {
-        ios: { useFrameworks: 'static' },
-        android: { minSdkVersion: 24 },
       },
     ],
     'expo-font',
@@ -79,17 +54,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         imageWidth: 180,
       },
     ],
-    ...(hasFirebaseFiles
-      ? [
-          '@react-native-firebase/app',
-          '@react-native-firebase/auth',
-          '@react-native-google-signin/google-signin',
-        ]
-      : []),
   ],
   extra: {
-    firebaseConfigured: hasFirebaseFiles,
-    googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
+    firebaseConfigured: false,
+    expoGoTestMode: true,
     eas: {
       projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID ?? '',
     },

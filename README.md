@@ -1,5 +1,10 @@
 # Streak75
 
+> **Expo Go test branch:** This branch is intentionally pinned to Expo SDK 54
+> and replaces Firebase/Google native integrations with no-op stubs. Follow
+> [Expo Go testing](docs/EXPO_GO_TESTING.md). The complete launch implementation
+> remains on `codex/streak75-app`.
+
 **Hit 75. Stay Ahead.**  
 Track. Analyze. Achieve.
 
@@ -37,27 +42,18 @@ up to Firestore, and exports print-ready PDF and Excel reports.
 
 ## Quick start
 
-Requirements: Node.js 20.19 or newer and npm.
+Requirements: Node.js 20.19 or newer, npm, and the current Expo Go app from the
+Play Store.
 
 ```bash
 npm install
-npm start
+npm run start:clear
 ```
 
-Without Firebase service files, the app intentionally starts in local-only mode.
-The development build uses prototype sample data so the approved design is
-immediately reviewable; release builds start with an empty subject list.
-
-Core local tracking and local notifications can be exercised without signing in.
-Google Sign-In and native Firestore require a development build:
-
-```bash
-npx expo prebuild
-npx expo run:android
-# npx expo run:ios  # macOS required
-```
-
-See [Firebase setup](docs/FIREBASE_SETUP.md) before creating that build.
+Scan the QR code with Expo Go while the phone and PC are on the same network.
+This test branch includes prototype sample data and supports local tracking,
+calendar editing, calculations, device reminders, and exports. It does not load
+Google Sign-In or Firebase native modules.
 
 ## Commands
 
@@ -129,6 +125,7 @@ templates; never commit service-account keys.
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Expo Go testing](docs/EXPO_GO_TESTING.md)
 - [Firebase and Google Sign-In setup](docs/FIREBASE_SETUP.md)
 - [Product assumptions](docs/ASSUMPTIONS.md)
 
