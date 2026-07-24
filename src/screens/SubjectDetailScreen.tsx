@@ -18,6 +18,7 @@ import { PageHeader } from '../components/PageHeader';
 import { RecordEditorModal } from '../components/RecordEditorModal';
 import { Screen } from '../components/Screen';
 import { SectionHeader } from '../components/SectionHeader';
+import { SubjectEditorModal } from '../components/SubjectEditorModal';
 import { colors, fonts, radii } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
 import {
@@ -34,14 +35,17 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
   const {
     subjects,
     settings,
-    markAttendance,
-    upsertNote,
+    saveAttendanceRecord,
+    removeAttendanceRecord,
     toggleFavorite,
     setSelectedSubjectId,
+    updateSubject,
+    deleteSubject,
   } = useApp();
   const subject = subjects.find((item) => item.id === route.params.subjectId);
   const [month, setMonth] = useState(new Date());
   const [editorDate, setEditorDate] = useState<string | null>(null);
+  const [editSubjectVisible, setEditSubjectVisible] = useState(false);
   const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
 
   const notes = useMemo(
@@ -93,19 +97,38 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
         subtitle={subject.professor}
         onBack={navigation.goBack}
         right={
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={subject.favorite ? 'Remove from favorites' : 'Add to favorites'}
-            hitSlop={10}
-            onPress={() => toggleFavorite(subject.id)}
-            style={styles.favoriteButton}
-          >
-            <MaterialCommunityIcons
-              name={subject.favorite ? 'star' : 'star-outline'}
-              color={subject.favorite ? colors.lime : colors.text}
-              size={25}
-            />
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Edit subject"
+              hitSlop={8}
+              onPress={() => setEditSubjectVisible(true)}
+              style={styles.headerButton}
+            >
+              <MaterialCommunityIcons
+                name="pencil-outline"
+                color={colors.cyan}
+                size={22}
+              />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                subject.favorite
+                  ? 'Remove from favorites'
+                  : 'Add to favorites'
+              }
+              hitSlop={8}
+              onPress={() => toggleFavorite(subject.id)}
+              style={styles.headerButton}
+            >
+              <MaterialCommunityIcons
+                name={subject.favorite ? 'star' : 'star-outline'}
+                color={subject.favorite ? colors.lime : colors.text}
+                size={25}
+              />
+            </Pressable>
+          </View>
         }
       />
 
@@ -219,9 +242,46 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
         onClose={() => setEditorDate(null)}
         onSave={(status, note) => {
           if (!editorDate) return;
-          markAttendance(subject.id, editorDate, status);
-          upsertNote(subject.id, editorDate, note);
+          saveAttendanceRecord(subject.id, editorDate, status, note);
         }}
+        onDelete={
+          editorDate
+            ? () => removeAttendanceRecord(subject.id, editorDate)
+            : undefined
+        }
+      />
+      <SubjectEditorModal
+        visible={editSubjectVisible}
+        subject={subject}
+        onClose={() => setEditSubjectVisible(false)}
+        onSubmit={(input) =>
+          updateSubject(subject.id, {
+            name: input.name,
+            professor: input.professor || undefined,
+            icon: input.icon,
+            color: input.color,
+            openingClassesHeld: input.classesHeld,
+            openingClassesAttended: input.classesAttended,
+          })
+        }
+        onDelete={() =>
+          Alert.alert(
+            'Delete subject?',
+            `${subject.name} and all of its attendance records will be permanently removed from this device.`,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: () => {
+                  setEditSubjectVisible(false);
+                  deleteSubject(subject.id);
+                  navigation.goBack();
+                },
+              },
+            ],
+          )
+        }
       />
     </Screen>
   );
@@ -242,8 +302,12 @@ const styles = StyleSheet.create({
     color: colors.cyan,
     fontFamily: fonts.medium,
   },
-  favoriteButton: {
-    width: 42,
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButton: {
+    width: 38,
     height: 42,
     alignItems: 'center',
     justifyContent: 'center',

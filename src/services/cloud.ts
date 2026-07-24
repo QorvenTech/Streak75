@@ -180,6 +180,27 @@ export async function queueRecordWrite(
   ]);
 }
 
+export async function queueRecordDelete(
+  subjectId: string,
+  date: string,
+): Promise<void> {
+  const uid = await currentUserId();
+  if (!uid) return;
+  const { firestore } = await getModules();
+  const database = firestore.getFirestore();
+  await firestore.deleteDoc(
+    firestore.doc(
+      database,
+      'users',
+      uid,
+      'subjects',
+      subjectId,
+      'records',
+      date,
+    ),
+  );
+}
+
 export async function queueSubjectDelete(subject: Subject): Promise<void> {
   const uid = await currentUserId();
   if (!uid) return;

@@ -13,8 +13,10 @@ up to Firestore, and exports print-ready PDF and Excel reports.
 - Prototype-matched navy UI with the lime/cyan Streak75 shield brand
 - Home dashboard with weighted overall attendance, subject cards, cloud state,
   and one-tap Present/Absent/Note actions
-- Subject detail with favorite state, calendar heatmap, five attendance states,
-  notes, PDF report, and Excel report
+- Subject detail with edit/delete controls, favorite state, calendar heatmap,
+  five attendance states, notes, PDF report, and Excel report
+- Opening attendance balances plus atomic dated records, including back-date
+  corrections and clear-record support
 - Exact Bunk Meter inequalities for safe misses and recovery attendance
 - Combined Calendar and Smart Insights tabs
 - Editable attendance labels, thresholds, colors, global target, and live preview
@@ -28,7 +30,8 @@ up to Firestore, and exports print-ready PDF and Excel reports.
 
 ## Tech
 
-- Expo SDK 56 / React Native 0.85 / TypeScript
+- Expo SDK 54 / React Native 0.81 / TypeScript on this Expo Go test branch
+  (the launch branch remains on Expo SDK 56)
 - React Navigation 7
 - React Native Firebase Auth + Firestore
 - `expo-notifications`, `expo-print`, `expo-sharing`, `expo-file-system`
@@ -108,8 +111,8 @@ users/{uid}
   applyBandsGlobally, updatedAt
 
 users/{uid}/subjects/{subjectId}
-  name, professor, icon, color, favorite, classesHeld, classesAttended,
-  createdAt, updatedAt
+  name, professor, icon, color, favorite, openingClassesHeld,
+  openingClassesAttended, classesHeld, classesAttended, createdAt, updatedAt
 
 users/{uid}/subjects/{subjectId}/records/{YYYY-MM-DD}
   date, status, note, updatedAt

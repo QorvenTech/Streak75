@@ -12,6 +12,7 @@ import {
 
 import { createInitialState, DEFAULT_SETTINGS } from '../data/defaults';
 import {
+  queueRecordDelete,
   queueRecordWrite,
   queueSubjectDelete,
   queueSubjectWrite,
@@ -25,13 +26,25 @@ import {
   UserProfile,
   UserSettings,
 } from '../types';
-import { attendancePercentage, statusContribution } from '../utils/attendance';
+import { attendancePercentage } from '../utils/attendance';
+import {
+  recalculateSubjectTotals,
+  removeSubjectRecord,
+  saveSubjectRecord,
+} from '../utils/records';
 
 const STORAGE_KEY = '@streak75/state/v1';
 
 interface AppContextValue extends PersistedAppState {
   hydrated: boolean;
   selectedSubject: Subject | undefined;
+  saveAttendanceRecord: (
+    subjectId: string,
+    date: string,
+    status: AttendanceStatus,
+    note: string,
+  ) => void;
+  removeAttendanceRecord: (subjectId: string, date: string) => void;
   markAttendance: (subjectId: string, date: string, status: AttendanceStatus) => void;
   upsertNote: (subjectId: string, date: string, note: string) => void;
   addSubject: (
@@ -63,6 +76,9 @@ export function AppProvider({ children }: PropsWithChildren) {
         setState((current) => ({
           ...current,
           ...parsed,
+          subjects: Array.isArray(parsed.subjects)
+            ? parsed.subjects.map(recalculateSubjectTotals)
+            : current.subjects.map(recalculateSubjectTotals),
           settings: { ...current.settings, ...parsed.settings },
           profile: { ...current.profile, ...parsed.profile },
         }));
@@ -81,35 +97,21 @@ export function AppProvider({ children }: PropsWithChildren) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => undefined);
   }, [hydrated, state]);
 
-  const markAttendance = useCallback(
-    (subjectId: string, date: string, status: AttendanceStatus) => {
+  const saveAttendanceRecord = useCallback(
+    (
+      subjectId: string,
+      date: string,
+      status: AttendanceStatus,
+      note: string,
+    ) => {
       const item = state.subjects.find((subject) => subject.id === subjectId);
       if (!item) return;
-      const previous = item.records[date];
-      const oldContribution = statusContribution(previous?.status);
-      const nextContribution = statusContribution(status);
-      const now = new Date().toISOString();
-      const record = {
+      const { subject: nextSubject, record } = saveSubjectRecord(
+        item,
         date,
         status,
-        note: previous?.note,
-        updatedAt: now,
-      };
-      const nextSubject: Subject = {
-        ...item,
-        classesHeld: Math.max(
-          0,
-          item.classesHeld - oldContribution.held + nextContribution.held,
-        ),
-        classesAttended: Math.max(
-          0,
-          item.classesAttended -
-            oldContribution.attended +
-            nextContribution.attended,
-        ),
-        records: { ...item.records, [date]: record },
-        updatedAt: now,
-      };
+        note,
+      );
       setState((current) => ({
         ...current,
         selectedSubjectId: subjectId,
@@ -139,30 +141,54 @@ export function AppProvider({ children }: PropsWithChildren) {
     [state.settings.colorBands, state.settings.notifications, state.subjects],
   );
 
-  const upsertNote = useCallback((subjectId: string, date: string, note: string) => {
-    const item = state.subjects.find((subject) => subject.id === subjectId);
-    if (!item) return;
-    const now = new Date().toISOString();
-    const previous = item.records[date];
-    const record = {
-      date,
-      status: previous?.status ?? ('no-class' as const),
-      note: note.trim() || undefined,
-      updatedAt: now,
-    };
-    const nextSubject = {
-      ...item,
-      records: { ...item.records, [date]: record },
-      updatedAt: now,
-    };
-    setState((current) => ({
-      ...current,
-      subjects: current.subjects.map((subject) =>
-        subject.id === subjectId ? nextSubject : subject,
-      ),
-    }));
-    queueRecordWrite(nextSubject, record).catch(() => undefined);
-  }, [state.subjects]);
+  const markAttendance = useCallback(
+    (subjectId: string, date: string, status: AttendanceStatus) => {
+      const item = state.subjects.find((subject) => subject.id === subjectId);
+      if (!item) return;
+      saveAttendanceRecord(
+        subjectId,
+        date,
+        status,
+        item.records[date]?.note ?? '',
+      );
+    },
+    [saveAttendanceRecord, state.subjects],
+  );
+
+  const upsertNote = useCallback(
+    (subjectId: string, date: string, note: string) => {
+      const item = state.subjects.find((subject) => subject.id === subjectId);
+      if (!item) return;
+      const previous = item.records[date];
+      if (!previous && !note.trim()) return;
+      saveAttendanceRecord(
+        subjectId,
+        date,
+        previous?.status ?? 'no-class',
+        note,
+      );
+    },
+    [saveAttendanceRecord, state.subjects],
+  );
+
+  const removeAttendanceRecord = useCallback(
+    (subjectId: string, date: string) => {
+      const item = state.subjects.find((subject) => subject.id === subjectId);
+      if (!item?.records[date]) return;
+      const nextSubject = removeSubjectRecord(item, date);
+      setState((current) => ({
+        ...current,
+        subjects: current.subjects.map((subject) =>
+          subject.id === subjectId ? nextSubject : subject,
+        ),
+      }));
+      Promise.all([
+        queueSubjectWrite(nextSubject),
+        queueRecordDelete(subjectId, date),
+      ]).catch(() => undefined);
+    },
+    [state.subjects],
+  );
 
   const addSubject = useCallback(
     (
@@ -180,6 +206,8 @@ export function AppProvider({ children }: PropsWithChildren) {
         ...input,
         id,
         favorite: false,
+        openingClassesHeld: classesHeld,
+        openingClassesAttended: classesAttended,
         classesHeld,
         classesAttended,
         records: {},
@@ -200,12 +228,12 @@ export function AppProvider({ children }: PropsWithChildren) {
   const updateSubject = useCallback((subjectId: string, update: Partial<Subject>) => {
     const item = state.subjects.find((subject) => subject.id === subjectId);
     if (!item) return;
-    const next = {
+    const next = recalculateSubjectTotals({
       ...item,
       ...update,
       id: item.id,
       updatedAt: new Date().toISOString(),
-    };
+    });
     setState((current) => ({
       ...current,
       subjects: current.subjects.map((item) =>
@@ -273,6 +301,9 @@ export function AppProvider({ children }: PropsWithChildren) {
     setState((current) => ({
       ...current,
       ...incoming,
+      subjects: (incoming.subjects ?? current.subjects).map(
+        recalculateSubjectTotals,
+      ),
       settings: { ...current.settings, ...incoming.settings },
       profile: { ...current.profile, ...incoming.profile },
     }));
@@ -285,6 +316,8 @@ export function AppProvider({ children }: PropsWithChildren) {
       selectedSubject: state.subjects.find(
         (subjectItem) => subjectItem.id === state.selectedSubjectId,
       ),
+      saveAttendanceRecord,
+      removeAttendanceRecord,
       markAttendance,
       upsertNote,
       addSubject,
@@ -302,9 +335,11 @@ export function AppProvider({ children }: PropsWithChildren) {
       deleteSubject,
       hydrated,
       markAttendance,
+      removeAttendanceRecord,
       replaceFromCloud,
       resetSettings,
       setSelectedSubjectId,
+      saveAttendanceRecord,
       state,
       toggleFavorite,
       updateProfile,
