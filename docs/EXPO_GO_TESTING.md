@@ -21,13 +21,19 @@ In PowerShell:
 cd "C:\Users\harsh\OneDrive\Documents\Streak75"
 git switch codex/expo-go-test
 npm install
-npm run start:clear
+npm start
 ```
 
 1. Install or update **Expo Go** from the Google Play Store.
 2. Keep the phone and PC on the same Wi-Fi network.
 3. Open Expo Go and scan the QR code shown in the terminal/browser.
 4. Keep the terminal open while testing because it serves the JavaScript bundle.
+5. On the first run, wait until the terminal reports that Android bundling has
+   completed. If Expo Go timed out while Metro was compiling, tap its reload
+   button; the cached retry should load much faster.
+
+Use `npm run start:clear` only when a normal cached start is behaving incorrectly.
+Clearing the cache makes the next bundle substantially slower.
 
 If the LAN QR code cannot connect:
 

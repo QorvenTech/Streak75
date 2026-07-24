@@ -47,10 +47,13 @@ Play Store.
 
 ```bash
 npm install
-npm run start:clear
+npm start
 ```
 
 Scan the QR code with Expo Go while the phone and PC are on the same network.
+The first Android bundle can take about a minute to compile on a cold cache. Keep
+Metro open and tap reload in Expo Go once the terminal reports that bundling is
+complete. Use `npm run start:clear` only when troubleshooting a stale cache.
 This test branch includes prototype sample data and supports local tracking,
 calendar editing, calculations, device reminders, and exports. It does not load
 Google Sign-In or Firebase native modules.
