@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "streak75-example",
+    "storage_bucket": "streak75-example.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:example",
+        "android_client_info": {
+          "package_name": "com.qorventech.streak75"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "EXAMPLE_NOT_A_REAL_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

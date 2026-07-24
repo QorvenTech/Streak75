@@ -1,4 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -7,6 +9,7 @@ import { Card } from '../components/Card';
 import { MetricTile } from '../components/MetricTile';
 import { Screen } from '../components/Screen';
 import { colors, fonts, radii } from '../constants/theme';
+import { TabParamList } from '../navigation/types';
 import { useApp } from '../store/AppProvider';
 import {
   aggregateSubjects,
@@ -18,6 +21,8 @@ import {
 } from '../utils/attendance';
 
 export function BunkMeterScreen() {
+  const navigation =
+    useNavigation<BottomTabNavigationProp<TabParamList, 'BunkMeter'>>();
   const { subjects, settings, selectedSubjectId, setSelectedSubjectId } = useApp();
   const [scope, setScope] = useState<string>(selectedSubjectId ?? 'overall');
   const [simulation, setSimulation] = useState(6);
@@ -31,6 +36,23 @@ export function BunkMeterScreen() {
   const missable = maxMissableClasses(attended, held, target);
   const needed = classesNeededToReachTarget(attended, held, target);
   const projected = projectedAfterAttend(attended, held, simulation);
+
+  if (!subjects.length) {
+    return (
+      <Screen scroll={false} contentContainerStyle={styles.empty}>
+        <View style={styles.emptyIcon}>
+          <MaterialCommunityIcons name="speedometer" color={colors.lime} size={42} />
+        </View>
+        <Text style={styles.emptyTitle}>Your Bunk Meter needs a subject</Text>
+        <Text style={styles.emptyText}>
+          Add your first subject and starting totals to calculate a safe bunk allowance.
+        </Text>
+        <Pressable onPress={() => navigation.navigate('Home')} style={styles.emptyButton}>
+          <Text style={styles.emptyButtonText}>Go to dashboard</Text>
+        </Pressable>
+      </Screen>
+    );
+  }
 
   const selectScope = (id: string) => {
     setScope(id);
@@ -191,6 +213,51 @@ export function BunkMeterScreen() {
 }
 
 const styles = StyleSheet.create({
+  empty: {
+    padding: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyIcon: {
+    width: 84,
+    height: 84,
+    marginBottom: 17,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  emptyText: {
+    maxWidth: 290,
+    marginTop: 7,
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 17,
+    textAlign: 'center',
+  },
+  emptyButton: {
+    minHeight: 46,
+    marginTop: 18,
+    paddingHorizontal: 20,
+    borderRadius: radii.md,
+    backgroundColor: colors.lime,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyButtonText: {
+    color: colors.background,
+    fontFamily: fonts.bold,
+    fontSize: 11,
+  },
   header: {
     minHeight: 72,
     flexDirection: 'row',

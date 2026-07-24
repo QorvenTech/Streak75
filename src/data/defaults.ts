@@ -85,23 +85,75 @@ function makeMonthRecords(seed: string): Subject['records'] {
 }
 
 export const createInitialState = (): PersistedAppState => ({
-  subjects: [
-    subject('economics', 'Economics', 'Prof. Mehta', 'book-open-variant', '#65D83A', 43, 50, true),
-    subject('taxation', 'Taxation', 'Prof. Sharma', 'calculator-variant', '#F4D93F', 37, 50),
-    subject(
-      'management-accounting',
-      'Management Accounting',
-      'Prof. Iyer',
-      'chart-line',
-      '#4DD66E',
-      46,
-      50,
-    ),
-    subject('marketing', 'Marketing', 'Prof. Kapoor', 'bullhorn-outline', '#FF7043', 34, 50),
-    subject('sociology', 'Sociology', 'Prof. Das', 'account-group-outline', '#35C5F0', 39, 48),
-    subject('java', 'Java Programming', 'Prof. Nair', 'laptop', '#47D98B', 45, 50),
-    subject('business-law', 'Business Law', 'Prof. Singh', 'scale-balance', '#8B7CF6', 38, 49),
-  ],
+  subjects:
+    typeof __DEV__ !== 'undefined' && __DEV__
+      ? [
+          subject(
+            'economics',
+            'Economics',
+            'Prof. Mehta',
+            'book-open-variant',
+            '#65D83A',
+            43,
+            50,
+            true,
+          ),
+          subject(
+            'taxation',
+            'Taxation',
+            'Prof. Sharma',
+            'calculator-variant',
+            '#F4D93F',
+            37,
+            50,
+          ),
+          subject(
+            'management-accounting',
+            'Management Accounting',
+            'Prof. Iyer',
+            'chart-line',
+            '#4DD66E',
+            46,
+            50,
+          ),
+          subject(
+            'marketing',
+            'Marketing',
+            'Prof. Kapoor',
+            'bullhorn-outline',
+            '#FF7043',
+            34,
+            50,
+          ),
+          subject(
+            'sociology',
+            'Sociology',
+            'Prof. Das',
+            'account-group-outline',
+            '#35C5F0',
+            39,
+            48,
+          ),
+          subject(
+            'java',
+            'Java Programming',
+            'Prof. Nair',
+            'laptop',
+            '#47D98B',
+            45,
+            50,
+          ),
+          subject(
+            'business-law',
+            'Business Law',
+            'Prof. Singh',
+            'scale-balance',
+            '#8B7CF6',
+            38,
+            49,
+          ),
+        ]
+      : [],
   settings: DEFAULT_SETTINGS,
   profile: {
     uid: null,
@@ -112,5 +164,6 @@ export const createInitialState = (): PersistedAppState => ({
     syncStatus: 'local-only',
     lastSyncedAt: null,
   },
-  selectedSubjectId: 'economics',
+  selectedSubjectId:
+    typeof __DEV__ !== 'undefined' && __DEV__ ? 'economics' : null,
 });

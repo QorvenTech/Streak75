@@ -30,6 +30,8 @@ interface AddSubjectModalProps {
     professor: string;
     icon: string;
     color: string;
+    classesHeld: number;
+    classesAttended: number;
   }) => void;
 }
 
@@ -41,6 +43,8 @@ export function AddSubjectModal({
   const [name, setName] = useState('');
   const [professor, setProfessor] = useState('');
   const [color, setColor] = useState<string>(colors.lime);
+  const [classesHeld, setClassesHeld] = useState('');
+  const [classesAttended, setClassesAttended] = useState('');
 
   const submit = () => {
     if (!name.trim()) return;
@@ -49,10 +53,17 @@ export function AddSubjectModal({
       professor: professor.trim(),
       icon: 'book-open-variant',
       color,
+      classesHeld: Number(classesHeld) || 0,
+      classesAttended: Math.min(
+        Number(classesHeld) || 0,
+        Number(classesAttended) || 0,
+      ),
     });
     setName('');
     setProfessor('');
     setColor(colors.lime);
+    setClassesHeld('');
+    setClassesAttended('');
     onClose();
   };
 
@@ -108,6 +119,33 @@ export function AddSubjectModal({
                 ) : null}
               </Pressable>
             ))}
+          </View>
+          <Text style={styles.label}>Starting totals (optional)</Text>
+          <View style={styles.totalRow}>
+            <View style={styles.totalField}>
+              <Text style={styles.totalLabel}>Classes held</Text>
+              <TextInput
+                value={classesHeld}
+                onChangeText={(value) => setClassesHeld(value.replace(/\D/g, ''))}
+                placeholder="0"
+                placeholderTextColor={colors.faint}
+                keyboardType="number-pad"
+                style={[styles.input, styles.totalInput]}
+              />
+            </View>
+            <View style={styles.totalField}>
+              <Text style={styles.totalLabel}>Classes attended</Text>
+              <TextInput
+                value={classesAttended}
+                onChangeText={(value) =>
+                  setClassesAttended(value.replace(/\D/g, ''))
+                }
+                placeholder="0"
+                placeholderTextColor={colors.faint}
+                keyboardType="number-pad"
+                style={[styles.input, styles.totalInput]}
+              />
+            </View>
           </View>
           <Pressable
             accessibilityRole="button"
@@ -195,9 +233,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   palette: {
-    marginBottom: 22,
+    marginBottom: 18,
     flexDirection: 'row',
     gap: 12,
+  },
+  totalRow: {
+    marginBottom: 18,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  totalField: {
+    flex: 1,
+  },
+  totalLabel: {
+    marginBottom: 5,
+    color: colors.muted,
+    fontFamily: fonts.medium,
+    fontSize: 9,
+  },
+  totalInput: {
+    marginBottom: 0,
+    textAlign: 'center',
   },
   swatch: {
     width: 34,

@@ -1,7 +1,14 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { AttendanceLegend } from '../components/AttendanceLegend';
 import { CalendarHeatmap } from '../components/CalendarHeatmap';
@@ -13,6 +20,10 @@ import { Screen } from '../components/Screen';
 import { SectionHeader } from '../components/SectionHeader';
 import { colors, fonts, radii } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
+import {
+  exportSubjectExcel,
+  exportSubjectPdf,
+} from '../services/exports';
 import { useApp } from '../store/AppProvider';
 import { getColorBand, roundedAttendance } from '../utils/attendance';
 import { formatShortDate, shiftMonth, toDateKey } from '../utils/dates';
@@ -31,6 +42,7 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
   const subject = subjects.find((item) => item.id === route.params.subjectId);
   const [month, setMonth] = useState(new Date());
   const [editorDate, setEditorDate] = useState<string | null>(null);
+  const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
 
   const notes = useMemo(
     () =>
@@ -56,6 +68,23 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
   const percentage = roundedAttendance(subject.classesAttended, subject.classesHeld);
   const band = getColorBand(percentage, settings.colorBands);
   const bunked = Math.max(0, subject.classesHeld - subject.classesAttended);
+  const runExport = async (format: 'pdf' | 'excel') => {
+    setExporting(format);
+    try {
+      if (format === 'pdf') {
+        await exportSubjectPdf(subject, settings);
+      } else {
+        await exportSubjectExcel(subject, settings);
+      }
+    } catch (error) {
+      Alert.alert(
+        'Export failed',
+        error instanceof Error ? error.message : 'The report could not be created.',
+      );
+    } finally {
+      setExporting(null);
+    }
+  };
 
   return (
     <Screen>
@@ -158,21 +187,27 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
 
       <View style={styles.exports}>
         <Pressable
-          onPress={() =>
-            Alert.alert('Export PDF', 'Report export is available in the export milestone.')
-          }
+          disabled={!!exporting}
+          onPress={() => runExport('pdf')}
           style={({ pressed }) => [styles.exportButton, pressed && styles.pressed]}
         >
-          <MaterialCommunityIcons name="file-pdf-box" color={colors.text} size={23} />
+          {exporting === 'pdf' ? (
+            <ActivityIndicator color={colors.text} size="small" />
+          ) : (
+            <MaterialCommunityIcons name="file-pdf-box" color={colors.text} size={23} />
+          )}
           <Text style={styles.exportText}>Export PDF</Text>
         </Pressable>
         <Pressable
-          onPress={() =>
-            Alert.alert('Export Excel', 'Report export is available in the export milestone.')
-          }
+          disabled={!!exporting}
+          onPress={() => runExport('excel')}
           style={({ pressed }) => [styles.exportButton, pressed && styles.pressed]}
         >
-          <MaterialCommunityIcons name="file-excel-outline" color={colors.lime} size={23} />
+          {exporting === 'excel' ? (
+            <ActivityIndicator color={colors.lime} size="small" />
+          ) : (
+            <MaterialCommunityIcons name="file-excel-outline" color={colors.lime} size={23} />
+          )}
           <Text style={styles.exportText}>Export Excel</Text>
         </Pressable>
       </View>

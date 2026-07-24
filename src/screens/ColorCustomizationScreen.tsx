@@ -23,6 +23,10 @@ import { SettingsRow } from '../components/SettingsRow';
 import { SubjectCard } from '../components/SubjectCard';
 import { colors, fonts, radii } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
+import {
+  exportAllExcel,
+  exportAllPdf,
+} from '../services/exports';
 import { scheduleDailyReminder } from '../services/notifications';
 import { useApp } from '../store/AppProvider';
 import { ColorBand } from '../types';
@@ -54,6 +58,7 @@ const timeFromDate = (date: Date) =>
 export function ColorCustomizationScreen({ navigation }: Props) {
   const { settings, subjects, profile, updateSettings, resetSettings } = useApp();
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const bands = useMemo(
     () => [...settings.colorBands].sort((a, b) => b.minimum - a.minimum),
     [settings.colorBands],
@@ -118,6 +123,24 @@ export function ColorCustomizationScreen({ navigation }: Props) {
     if (Platform.OS === 'android') setShowTimePicker(false);
     if (event.type === 'set' && date) {
       updateNotifications({ reminderTime: timeFromDate(date) });
+    }
+  };
+
+  const runExport = async (format: 'pdf' | 'excel') => {
+    setExporting(true);
+    try {
+      if (format === 'pdf') {
+        await exportAllPdf(subjects, settings);
+      } else {
+        await exportAllExcel(subjects, settings);
+      }
+    } catch (error) {
+      Alert.alert(
+        'Export failed',
+        error instanceof Error ? error.message : 'The report could not be created.',
+      );
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -254,9 +277,15 @@ export function ColorCustomizationScreen({ navigation }: Props) {
         </View>
         <Switch
           value={settings.applyBandsGlobally}
-          onValueChange={(applyBandsGlobally) =>
-            updateSettings({ applyBandsGlobally })
-          }
+          onValueChange={(applyBandsGlobally) => {
+            updateSettings({ applyBandsGlobally });
+            if (applyBandsGlobally) {
+              Alert.alert(
+                'Colors applied globally',
+                'Your updated bands now control every subject card and attendance indicator.',
+              );
+            }
+          }}
           trackColor={{ false: colors.surfaceSoft, true: colors.limeDark }}
           thumbColor={settings.applyBandsGlobally ? colors.lime : colors.muted}
         />
@@ -333,14 +362,14 @@ export function ColorCustomizationScreen({ navigation }: Props) {
           iconColor={colors.danger}
           title="Export all as PDF"
           subtitle="A print-ready attendance report for every subject."
-          onPress={() => Alert.alert('Export', 'PDF export is connected in the export milestone.')}
+          onPress={exporting ? undefined : () => runExport('pdf')}
         />
         <SettingsRow
           icon="file-excel-outline"
           iconColor={colors.success}
           title="Export all as Excel"
           subtitle="One workbook with summary and attendance records."
-          onPress={() => Alert.alert('Export', 'Excel export is connected in the export milestone.')}
+          onPress={exporting ? undefined : () => runExport('excel')}
         />
       </View>
 

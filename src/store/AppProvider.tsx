@@ -34,7 +34,10 @@ interface AppContextValue extends PersistedAppState {
   selectedSubject: Subject | undefined;
   markAttendance: (subjectId: string, date: string, status: AttendanceStatus) => void;
   upsertNote: (subjectId: string, date: string, note: string) => void;
-  addSubject: (input: Pick<Subject, 'name' | 'professor' | 'icon' | 'color'>) => string;
+  addSubject: (
+    input: Pick<Subject, 'name' | 'professor' | 'icon' | 'color'> &
+      Partial<Pick<Subject, 'classesHeld' | 'classesAttended'>>,
+  ) => string;
   updateSubject: (subjectId: string, update: Partial<Subject>) => void;
   deleteSubject: (subjectId: string) => void;
   toggleFavorite: (subjectId: string) => void;
@@ -162,15 +165,23 @@ export function AppProvider({ children }: PropsWithChildren) {
   }, [state.subjects]);
 
   const addSubject = useCallback(
-    (input: Pick<Subject, 'name' | 'professor' | 'icon' | 'color'>): string => {
+    (
+      input: Pick<Subject, 'name' | 'professor' | 'icon' | 'color'> &
+        Partial<Pick<Subject, 'classesHeld' | 'classesAttended'>>,
+    ): string => {
       const id = Crypto.randomUUID();
       const now = new Date().toISOString();
+      const classesHeld = Math.max(0, Math.round(input.classesHeld ?? 0));
+      const classesAttended = Math.min(
+        classesHeld,
+        Math.max(0, Math.round(input.classesAttended ?? 0)),
+      );
       const next: Subject = {
         ...input,
         id,
         favorite: false,
-        classesHeld: 0,
-        classesAttended: 0,
+        classesHeld,
+        classesAttended,
         records: {},
         createdAt: now,
         updatedAt: now,

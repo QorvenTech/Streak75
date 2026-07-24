@@ -50,6 +50,20 @@ export function InsightsScreen() {
     ? Math.round((presentThisMonth / markedThisMonth) * 100)
     : 0;
 
+  if (!subjects.length) {
+    return (
+      <Screen scroll={false} contentContainerStyle={styles.empty}>
+        <View style={styles.emptyIcon}>
+          <MaterialCommunityIcons name="chart-box-outline" color={colors.cyan} size={42} />
+        </View>
+        <Text style={styles.emptyTitle}>Insights begin with your first subject</Text>
+        <Text style={styles.emptyText}>
+          Mark a few classes and Streak75 will surface risks, rankings, and recovery plans.
+        </Text>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -171,6 +185,37 @@ export function InsightsScreen() {
 }
 
 const styles = StyleSheet.create({
+  empty: {
+    padding: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyIcon: {
+    width: 84,
+    height: 84,
+    marginBottom: 17,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  emptyText: {
+    maxWidth: 290,
+    marginTop: 7,
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 17,
+    textAlign: 'center',
+  },
   header: {
     minHeight: 78,
     flexDirection: 'row',
