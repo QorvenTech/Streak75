@@ -7,6 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'streak75',
   owner: process.env.EXPO_PUBLIC_EXPO_OWNER ?? 'harshsharma10',
   version: '1.0.0',
+  runtimeVersion: 'exposdk:54.0.0',
   updates: {
     url: 'https://u.expo.dev/05a2bc7c-94f4-4a8f-8528-f1ff41c23b8c',
   },
