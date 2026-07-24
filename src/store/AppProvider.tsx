@@ -12,13 +12,20 @@ import {
 
 import { createInitialState, DEFAULT_SETTINGS } from '../data/defaults';
 import {
+  queueRecordWrite,
+  queueSubjectDelete,
+  queueSubjectWrite,
+  queueUserSettingsWrite,
+} from '../services/cloud';
+import { sendLowAttendanceAlert } from '../services/notifications';
+import {
   AttendanceStatus,
   PersistedAppState,
   Subject,
   UserProfile,
   UserSettings,
 } from '../types';
-import { statusContribution } from '../utils/attendance';
+import { attendancePercentage, statusContribution } from '../utils/attendance';
 
 const STORAGE_KEY = '@streak75/state/v1';
 
@@ -73,67 +80,86 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   const markAttendance = useCallback(
     (subjectId: string, date: string, status: AttendanceStatus) => {
+      const item = state.subjects.find((subject) => subject.id === subjectId);
+      if (!item) return;
+      const previous = item.records[date];
+      const oldContribution = statusContribution(previous?.status);
+      const nextContribution = statusContribution(status);
+      const now = new Date().toISOString();
+      const record = {
+        date,
+        status,
+        note: previous?.note,
+        updatedAt: now,
+      };
+      const nextSubject: Subject = {
+        ...item,
+        classesHeld: Math.max(
+          0,
+          item.classesHeld - oldContribution.held + nextContribution.held,
+        ),
+        classesAttended: Math.max(
+          0,
+          item.classesAttended -
+            oldContribution.attended +
+            nextContribution.attended,
+        ),
+        records: { ...item.records, [date]: record },
+        updatedAt: now,
+      };
       setState((current) => ({
         ...current,
         selectedSubjectId: subjectId,
-        subjects: current.subjects.map((item) => {
-          if (item.id !== subjectId) return item;
-          const previous = item.records[date];
-          const oldContribution = statusContribution(previous?.status);
-          const nextContribution = statusContribution(status);
-          const now = new Date().toISOString();
-          return {
-            ...item,
-            classesHeld: Math.max(
-              0,
-              item.classesHeld - oldContribution.held + nextContribution.held,
-            ),
-            classesAttended: Math.max(
-              0,
-              item.classesAttended -
-                oldContribution.attended +
-                nextContribution.attended,
-            ),
-            records: {
-              ...item.records,
-              [date]: {
-                date,
-                status,
-                note: previous?.note,
-                updatedAt: now,
-              },
-            },
-            updatedAt: now,
-          };
-        }),
+        subjects: current.subjects.map((subject) =>
+          subject.id === subjectId ? nextSubject : subject,
+        ),
       }));
+      queueRecordWrite(nextSubject, record).catch(() => undefined);
+
+      const atRisk = state.settings.colorBands.find(
+        (band) => band.id === 'at-risk',
+      );
+      const threshold = atRisk?.minimum ?? 60;
+      const before = attendancePercentage(item.classesAttended, item.classesHeld);
+      const after = attendancePercentage(
+        nextSubject.classesAttended,
+        nextSubject.classesHeld,
+      );
+      if (
+        state.settings.notifications.lowAttendanceAlertEnabled &&
+        before >= threshold &&
+        after < threshold
+      ) {
+        sendLowAttendanceAlert(item.name, after).catch(() => undefined);
+      }
     },
-    [],
+    [state.settings.colorBands, state.settings.notifications, state.subjects],
   );
 
   const upsertNote = useCallback((subjectId: string, date: string, note: string) => {
+    const item = state.subjects.find((subject) => subject.id === subjectId);
+    if (!item) return;
+    const now = new Date().toISOString();
+    const previous = item.records[date];
+    const record = {
+      date,
+      status: previous?.status ?? ('no-class' as const),
+      note: note.trim() || undefined,
+      updatedAt: now,
+    };
+    const nextSubject = {
+      ...item,
+      records: { ...item.records, [date]: record },
+      updatedAt: now,
+    };
     setState((current) => ({
       ...current,
-      subjects: current.subjects.map((item) => {
-        if (item.id !== subjectId) return item;
-        const now = new Date().toISOString();
-        const previous = item.records[date];
-        return {
-          ...item,
-          records: {
-            ...item.records,
-            [date]: {
-              date,
-              status: previous?.status ?? 'no-class',
-              note: note.trim() || undefined,
-              updatedAt: now,
-            },
-          },
-          updatedAt: now,
-        };
-      }),
+      subjects: current.subjects.map((subject) =>
+        subject.id === subjectId ? nextSubject : subject,
+      ),
     }));
-  }, []);
+    queueRecordWrite(nextSubject, record).catch(() => undefined);
+  }, [state.subjects]);
 
   const addSubject = useCallback(
     (input: Pick<Subject, 'name' | 'professor' | 'icon' | 'color'>): string => {
@@ -154,23 +180,32 @@ export function AppProvider({ children }: PropsWithChildren) {
         subjects: [...current.subjects, next],
         selectedSubjectId: id,
       }));
+      queueSubjectWrite(next).catch(() => undefined);
       return id;
     },
     [],
   );
 
   const updateSubject = useCallback((subjectId: string, update: Partial<Subject>) => {
+    const item = state.subjects.find((subject) => subject.id === subjectId);
+    if (!item) return;
+    const next = {
+      ...item,
+      ...update,
+      id: item.id,
+      updatedAt: new Date().toISOString(),
+    };
     setState((current) => ({
       ...current,
       subjects: current.subjects.map((item) =>
-        item.id === subjectId
-          ? { ...item, ...update, id: item.id, updatedAt: new Date().toISOString() }
-          : item,
+        item.id === subjectId ? next : item,
       ),
     }));
-  }, []);
+    queueSubjectWrite(next).catch(() => undefined);
+  }, [state.subjects]);
 
   const deleteSubject = useCallback((subjectId: string) => {
+    const deleted = state.subjects.find((subject) => subject.id === subjectId);
     setState((current) => {
       const subjects = current.subjects.filter((item) => item.id !== subjectId);
       return {
@@ -182,31 +217,39 @@ export function AppProvider({ children }: PropsWithChildren) {
             : current.selectedSubjectId,
       };
     });
-  }, []);
+    if (deleted) queueSubjectDelete(deleted).catch(() => undefined);
+  }, [state.subjects]);
 
   const toggleFavorite = useCallback((subjectId: string) => {
+    const item = state.subjects.find((subject) => subject.id === subjectId);
+    if (!item) return;
+    const next = { ...item, favorite: !item.favorite };
     setState((current) => ({
       ...current,
       subjects: current.subjects.map((item) =>
-        item.id === subjectId ? { ...item, favorite: !item.favorite } : item,
+        item.id === subjectId ? next : item,
       ),
     }));
-  }, []);
+    queueSubjectWrite(next).catch(() => undefined);
+  }, [state.subjects]);
 
   const setSelectedSubjectId = useCallback((subjectId: string | null) => {
     setState((current) => ({ ...current, selectedSubjectId: subjectId }));
   }, []);
 
   const updateSettings = useCallback((update: Partial<UserSettings>) => {
+    const next = { ...state.settings, ...update };
     setState((current) => ({
       ...current,
-      settings: { ...current.settings, ...update },
+      settings: next,
     }));
-  }, []);
+    queueUserSettingsWrite(next, state.profile).catch(() => undefined);
+  }, [state.profile, state.settings]);
 
   const resetSettings = useCallback(() => {
     setState((current) => ({ ...current, settings: DEFAULT_SETTINGS }));
-  }, []);
+    queueUserSettingsWrite(DEFAULT_SETTINGS, state.profile).catch(() => undefined);
+  }, [state.profile]);
 
   const updateProfile = useCallback((update: Partial<UserProfile>) => {
     setState((current) => ({

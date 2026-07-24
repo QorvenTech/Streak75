@@ -46,7 +46,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-dev-client',
-    'expo-notifications',
+    [
+      'expo-notifications',
+      {
+        icon: './assets/android-icon-monochrome.png',
+        color: '#B6F20C',
+        defaultChannel: 'attendance-reminders',
+      },
+    ],
     'expo-sharing',
     [
       'expo-file-system',

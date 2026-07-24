@@ -23,6 +23,7 @@ import { SettingsRow } from '../components/SettingsRow';
 import { SubjectCard } from '../components/SubjectCard';
 import { colors, fonts, radii } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
+import { scheduleDailyReminder } from '../services/notifications';
 import { useApp } from '../store/AppProvider';
 import { ColorBand } from '../types';
 import { getColorBand, roundedAttendance } from '../utils/attendance';
@@ -90,9 +91,27 @@ export function ColorCustomizationScreen({ navigation }: Props) {
   const updateNotifications = (
     update: Partial<typeof settings.notifications>,
   ) => {
+    const next = { ...settings.notifications, ...update };
     updateSettings({
-      notifications: { ...settings.notifications, ...update },
+      notifications: next,
     });
+    if ('dailyReminderEnabled' in update || 'reminderTime' in update) {
+      scheduleDailyReminder(next)
+        .then((result) => {
+          if (result.reason === 'permission-denied') {
+            Alert.alert(
+              'Notifications are disabled',
+              'Enable notifications for Streak75 in device settings to receive the daily reminder.',
+            );
+          }
+        })
+        .catch(() =>
+          Alert.alert(
+            'Reminder not scheduled',
+            'Your preference was saved, but the device could not schedule the reminder.',
+          ),
+        );
+    }
   };
 
   const onTimeChange = (event: DateTimePickerEvent, date?: Date) => {

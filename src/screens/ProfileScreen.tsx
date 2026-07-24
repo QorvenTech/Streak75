@@ -2,13 +2,22 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '../components/Card';
 import { Screen } from '../components/Screen';
 import { SettingsRow } from '../components/SettingsRow';
 import { colors, fonts, radii } from '../constants/theme';
 import { RootStackParamList, TabParamList } from '../navigation/types';
+import {
+  isCloudConfigured,
+  readableCloudError,
+  signInWithGoogle,
+  signOutFromGoogle,
+  syncAllToCloud,
+  waitForCloudSync,
+} from '../services/cloud';
 import { useApp } from '../store/AppProvider';
 
 type ProfileNavigation = CompositeNavigationProp<
@@ -18,7 +27,69 @@ type ProfileNavigation = CompositeNavigationProp<
 
 export function ProfileScreen() {
   const navigation = useNavigation<ProfileNavigation>();
-  const { profile, settings, subjects } = useApp();
+  const { profile, settings, subjects, updateProfile } = useApp();
+  const [cloudBusy, setCloudBusy] = useState(false);
+
+  const handleGoogleAccount = async () => {
+    if (!isCloudConfigured()) {
+      Alert.alert(
+        'Firebase setup required',
+        'Add the two Firebase service files, set your Google web client ID, and build the development client. Local attendance is fully available meanwhile.',
+      );
+      return;
+    }
+    setCloudBusy(true);
+    try {
+      if (profile.authMode === 'signed-in') {
+        await signOutFromGoogle();
+        updateProfile({
+          uid: null,
+          email: null,
+          photoURL: null,
+          authMode: 'local',
+          syncStatus: 'local-only',
+          lastSyncedAt: null,
+        });
+      } else {
+        const user = await signInWithGoogle();
+        updateProfile({
+          ...user,
+          authMode: 'signed-in',
+          syncStatus: 'syncing',
+        });
+      }
+    } catch (error) {
+      Alert.alert('Google backup', readableCloudError(error));
+    } finally {
+      setCloudBusy(false);
+    }
+  };
+
+  const handleManualSync = async () => {
+    if (!profile.uid || profile.authMode !== 'signed-in') {
+      Alert.alert(
+        'Sign in for backup',
+        'You can keep tracking locally. Connect Google only when you want cloud backup.',
+      );
+      return;
+    }
+    setCloudBusy(true);
+    updateProfile({ syncStatus: 'syncing' });
+    try {
+      await syncAllToCloud(profile.uid, { profile, settings, subjects });
+      await waitForCloudSync();
+      updateProfile({
+        syncStatus: 'up-to-date',
+        lastSyncedAt: new Date().toISOString(),
+      });
+      Alert.alert('Cloud sync complete', 'Your attendance backup is up to date.');
+    } catch (error) {
+      updateProfile({ syncStatus: 'offline' });
+      Alert.alert('Cloud sync', readableCloudError(error));
+    } finally {
+      setCloudBusy(false);
+    }
+  };
 
   return (
     <Screen>
@@ -101,11 +172,11 @@ export function ProfileScreen() {
               ? profile.email ?? 'Cloud backup enabled'
               : 'Keep local tracking now; connect for cloud backup.'
           }
-          onPress={() =>
-            Alert.alert(
-              'Google backup',
-              'Google Sign-In is connected in the Firebase integration milestone.',
-            )
+          onPress={handleGoogleAccount}
+          right={
+            cloudBusy ? (
+              <ActivityIndicator color={colors.cyan} size="small" />
+            ) : undefined
           }
         />
         <SettingsRow
@@ -116,14 +187,7 @@ export function ProfileScreen() {
               ? `Last synced ${profile.lastSyncedAt}`
               : 'Your local records are safe on this device.'
           }
-          onPress={() =>
-            Alert.alert(
-              profile.authMode === 'signed-in' ? 'Sync requested' : 'Sign in required',
-              profile.authMode === 'signed-in'
-                ? 'Cloud sync will start shortly.'
-                : 'Attendance remains available offline. Sign in only when you want backup.',
-            )
-          }
+          onPress={handleManualSync}
         />
       </View>
 
