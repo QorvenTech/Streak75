@@ -1,0 +1,67 @@
+export type AttendanceStatus =
+  | 'present'
+  | 'absent'
+  | 'leave'
+  | 'holiday'
+  | 'no-class';
+
+export interface AttendanceRecord {
+  date: string;
+  status: AttendanceStatus;
+  note?: string;
+  updatedAt: string;
+}
+
+export interface Subject {
+  id: string;
+  name: string;
+  professor?: string;
+  icon: string;
+  color: string;
+  favorite: boolean;
+  classesHeld: number;
+  classesAttended: number;
+  records: Record<string, AttendanceRecord>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ColorBand {
+  id: string;
+  label: string;
+  minimum: number;
+  color: string;
+}
+
+export interface NotificationPreferences {
+  dailyReminderEnabled: boolean;
+  reminderTime: string;
+  lowAttendanceAlertEnabled: boolean;
+}
+
+export interface UserSettings {
+  targetPercentage: number;
+  colorBands: ColorBand[];
+  notifications: NotificationPreferences;
+  applyBandsGlobally: boolean;
+}
+
+export type AuthMode = 'local' | 'signed-in';
+export type SyncStatus = 'local-only' | 'syncing' | 'up-to-date' | 'offline' | 'error';
+
+export interface UserProfile {
+  uid: string | null;
+  displayName: string;
+  email: string | null;
+  photoURL: string | null;
+  authMode: AuthMode;
+  syncStatus: SyncStatus;
+  lastSyncedAt: string | null;
+}
+
+export interface PersistedAppState {
+  subjects: Subject[];
+  settings: UserSettings;
+  profile: UserProfile;
+  selectedSubjectId: string | null;
+}
