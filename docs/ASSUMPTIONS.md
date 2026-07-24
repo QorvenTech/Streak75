@@ -36,3 +36,6 @@ open. Streak75 uses the following explicit assumptions:
     before the student starts adding dated entries. Every dated record is applied
     on top, can be corrected atomically, and can be cleared without changing the
     opening balance.
+14. **A manual icon choice always wins.** Name changes only refresh an
+    auto-suggested icon. The user must tap **Use auto** before matching can replace
+    a manually selected icon.

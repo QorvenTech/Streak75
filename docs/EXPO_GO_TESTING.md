@@ -47,6 +47,7 @@ Tunnel mode may ask permission to install Expo's tunnel helper the first time.
 
 - All five tabs and responsive dark UI
 - Add, edit, favorite, and delete subjects with opening attendance totals
+- Live icon auto-suggestions and the searchable 110-icon manual picker
 - Present/Absent quick actions
 - Subject calendar and record editing
 - Leave, Holiday, and No class states
@@ -69,17 +70,21 @@ Expo Go cannot load native libraries that are not already compiled into it.
 
 ## Suggested test checklist
 
-1. Add a subject with opening held/attended totals.
-2. Select a previous date, save Present with a note, and verify both persist.
-3. Edit the same date to Absent and verify held stays fixed while attended drops.
-4. Clear that date and verify the opening totals are restored.
-5. Edit the subject spelling, faculty, icon, color, and opening totals.
-6. Restart Expo Go and confirm the subject and dated records remain.
-7. Compare Bunk Meter results against the corrected totals.
-8. Change target and attendance bands and verify every card.
-9. Set the reminder 2-3 minutes ahead, background Expo Go, and check delivery.
-10. Export one subject to PDF and Excel.
-11. Enable airplane mode and repeat local attendance edits.
+1. Type `DBMS`, `Eco`, `Accounts`, and `Java Programming`; verify each live icon.
+2. Open **Change icon**, search by a label/alias, and manually choose another icon.
+3. Continue editing the subject name and verify that the manual icon stays fixed.
+4. Tap **Use auto** and verify the icon follows the subject name again.
+5. Add the subject with opening held/attended totals.
+6. Select a previous date, save Present with a note, and verify both persist.
+7. Edit the same date to Absent and verify held stays fixed while attended drops.
+8. Clear that date and verify the opening totals are restored.
+9. Edit the subject spelling, faculty, icon, color, and opening totals.
+10. Restart Expo Go and confirm the subject, icon, and records remain.
+11. Compare Bunk Meter results against the corrected totals.
+12. Change target and attendance bands and verify every card.
+13. Set the reminder 2-3 minutes ahead, background Expo Go, and check delivery.
+14. Export one subject to PDF and Excel.
+15. Enable airplane mode and repeat local edits.
 
 ## Switch back to the launch branch
 

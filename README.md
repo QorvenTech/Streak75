@@ -20,6 +20,8 @@ up to Firestore, and exports print-ready PDF and Excel reports.
   and one-tap Present/Absent/Note actions
 - Subject detail with edit/delete controls, favorite state, calendar heatmap,
   five attendance states, notes, PDF report, and Excel report
+- 110 optimized illustrated subject icons with debounced name-based suggestions,
+  Indian abbreviations, and a searchable manual picker
 - Opening attendance balances plus atomic dated records, including back-date
   corrections and clear-record support
 - Exact Bunk Meter inequalities for safe misses and recovery attendance
@@ -31,7 +33,8 @@ up to Firestore, and exports print-ready PDF and Excel reports.
 - Google Sign-In through React Native Firebase in an Expo development build
 - Firestore rules that restrict every user document and subcollection to its owner
 - EAS development, preview, and production build profiles
-- Unit tests for attendance math and cloud/local record merging
+- Unit tests for attendance math, subject icon matching, asset integrity, and
+  cloud/local record merging
 
 ## Tech
 
@@ -110,7 +113,8 @@ users/{uid}
   applyBandsGlobally, updatedAt
 
 users/{uid}/subjects/{subjectId}
-  name, professor, icon, color, favorite, openingClassesHeld,
+  name, professor, iconId, iconSelectionSource, icon, color, favorite,
+  openingClassesHeld,
   openingClassesAttended, classesHeld, classesAttended, createdAt, updatedAt
 
 users/{uid}/subjects/{subjectId}/records/{YYYY-MM-DD}

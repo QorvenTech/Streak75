@@ -54,7 +54,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "tsx --test src/utils/attendance.test.ts src/utils/records.test.ts src/services/merge.test.ts",
+    "test": "tsx --test src/utils/attendance.test.ts src/utils/records.test.ts src/services/merge.test.ts src/constants/subjectIconMap.test.ts",
     "generate:assets": "node scripts/generate-brand-assets.mjs",
     "validate": "npm run typecheck && npm run lint && npm test"
   },
