@@ -5,8 +5,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: 'Streak75',
   slug: 'streak75',
   scheme: 'streak75',
-  owner: process.env.EXPO_PUBLIC_EXPO_OWNER,
+  owner: process.env.EXPO_PUBLIC_EXPO_OWNER ?? 'harshsharma10',
   version: '1.0.0',
+  runtimeVersion: {
+    policy: 'appVersion',
+  },
+  updates: {
+    url: 'https://u.expo.dev/05a2bc7c-94f4-4a8f-8528-f1ff41c23b8c',
+  },
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'dark',
@@ -59,7 +65,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     firebaseConfigured: false,
     expoGoTestMode: true,
     eas: {
-      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID ?? '',
+      projectId:
+        process.env.EXPO_PUBLIC_EAS_PROJECT_ID ??
+        '05a2bc7c-94f4-4a8f-8528-f1ff41c23b8c',
     },
   },
   experiments: {
