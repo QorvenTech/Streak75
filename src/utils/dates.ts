@@ -28,3 +28,32 @@ export const monthTitle = (date: Date): string =>
 
 export const shiftMonth = (date: Date, delta: number): Date =>
   new Date(date.getFullYear(), date.getMonth() + delta, 1);
+
+export interface CalendarDay {
+  date: Date;
+  key: string;
+  day: number;
+  inCurrentMonth: boolean;
+  isToday: boolean;
+}
+
+export const getCalendarDays = (month: Date): CalendarDay[] => {
+  const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const mondayOffset = (first.getDay() + 6) % 7;
+  const start = new Date(first);
+  start.setDate(first.getDate() - mondayOffset);
+  const todayKey = toDateKey(new Date());
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    const key = toDateKey(date);
+    return {
+      date,
+      key,
+      day: date.getDate(),
+      inCurrentMonth: date.getMonth() === month.getMonth(),
+      isToday: key === todayKey,
+    };
+  });
+};
