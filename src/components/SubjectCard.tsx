@@ -5,6 +5,7 @@ import { colors, fonts, radii } from '../constants/theme';
 import { ColorBand, Subject } from '../types';
 import { roundedAttendance } from '../utils/attendance';
 import { StatusPill } from './StatusPill';
+import { SubjectIconImage } from './SubjectIconImage';
 
 interface SubjectCardProps {
   subject: Subject;
@@ -29,10 +30,11 @@ export function SubjectCard({ subject, band, onPress, preview = false }: Subject
       ]}
     >
       <View style={[styles.iconWrap, { borderColor: `${subject.color}88` }]}>
-        <MaterialCommunityIcons
-          name={subject.icon as keyof typeof MaterialCommunityIcons.glyphMap}
-          color={subject.color}
-          size={20}
+        <SubjectIconImage
+          iconId={subject.iconId}
+          legacyIcon={subject.icon}
+          fallbackColor={subject.color}
+          size={30}
         />
       </View>
       <View style={styles.copy}>

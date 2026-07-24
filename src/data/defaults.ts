@@ -1,4 +1,5 @@
 import { ColorBand, PersistedAppState, Subject, UserSettings } from '../types';
+import { suggestSubjectIcon } from '../constants/subjectIconMap';
 import { toDateKey } from '../utils/dates';
 import { recordTotals } from '../utils/records';
 
@@ -44,6 +45,8 @@ const subject = (
     id,
     name,
     professor,
+    iconId: suggestSubjectIcon(name).id,
+    iconSelectionSource: 'auto',
     icon,
     color,
     favorite,

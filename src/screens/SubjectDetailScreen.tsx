@@ -259,6 +259,8 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
             name: input.name,
             professor: input.professor || undefined,
             icon: input.icon,
+            iconId: input.iconId,
+            iconSelectionSource: input.iconSelectionSource,
             color: input.color,
             openingClassesHeld: input.classesHeld,
             openingClassesAttended: input.classesAttended,

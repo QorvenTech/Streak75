@@ -12,9 +12,16 @@ import {
   View,
 } from 'react-native';
 
+import { SubjectIconId } from '../constants/subjectIconAssets';
+import {
+  getSubjectIcon,
+  suggestSubjectIcon,
+} from '../constants/subjectIconMap';
 import { colors, fonts, radii, spacing } from '../constants/theme';
 import { Subject } from '../types';
 import { openingTotals } from '../utils/records';
+import { SubjectIconImage } from './SubjectIconImage';
+import { SubjectIconPickerModal } from './SubjectIconPickerModal';
 
 const subjectColors = [
   colors.lime,
@@ -25,19 +32,12 @@ const subjectColors = [
   '#47D98B',
 ];
 
-const subjectIcons = [
-  'book-open-variant',
-  'calculator-variant',
-  'laptop',
-  'flask-outline',
-  'chart-line',
-  'scale-balance',
-] as const;
-
 export interface SubjectEditorInput {
   name: string;
   professor: string;
   icon: string;
+  iconId: SubjectIconId;
+  iconSelectionSource: 'auto' | 'manual';
   color: string;
   classesHeld: number;
   classesAttended: number;
@@ -60,7 +60,12 @@ export function SubjectEditorModal({
 }: SubjectEditorModalProps) {
   const [name, setName] = useState('');
   const [professor, setProfessor] = useState('');
-  const [icon, setIcon] = useState<string>('book-open-variant');
+  const [iconId, setIconId] =
+    useState<SubjectIconId>('generic-subject');
+  const [iconSelectionSource, setIconSelectionSource] = useState<
+    'auto' | 'manual'
+  >('auto');
+  const [pickerVisible, setPickerVisible] = useState(false);
   const [color, setColor] = useState<string>(colors.lime);
   const [classesHeld, setClassesHeld] = useState('');
   const [classesAttended, setClassesAttended] = useState('');
@@ -69,18 +74,42 @@ export function SubjectEditorModal({
   useEffect(() => {
     if (!visible) return;
     const opening = subject ? openingTotals(subject) : { held: 0, attended: 0 };
+    const suggested = suggestSubjectIcon(subject?.name ?? '');
     setName(subject?.name ?? '');
     setProfessor(subject?.professor ?? '');
-    setIcon(subject?.icon ?? 'book-open-variant');
+    setIconId(subject?.iconId ?? suggested.id);
+    setIconSelectionSource(
+      subject?.iconId
+        ? (subject.iconSelectionSource ?? 'manual')
+        : 'auto',
+    );
     setColor(subject?.color ?? colors.lime);
     setClassesHeld(opening.held ? `${opening.held}` : '');
     setClassesAttended(opening.attended ? `${opening.attended}` : '');
     setError(null);
+    setPickerVisible(false);
   }, [subject, visible]);
+
+  useEffect(() => {
+    if (!visible || iconSelectionSource === 'manual') return;
+    const timeout = setTimeout(() => {
+      setIconId(suggestSubjectIcon(name).id);
+    }, 180);
+    return () => clearTimeout(timeout);
+  }, [iconSelectionSource, name, visible]);
+
+  const close = () => {
+    setPickerVisible(false);
+    onClose();
+  };
 
   const submit = () => {
     const held = Number(classesHeld) || 0;
     const attended = Number(classesAttended) || 0;
+    const finalIconId =
+      iconSelectionSource === 'auto'
+        ? suggestSubjectIcon(name).id
+        : iconId;
     if (!name.trim()) {
       setError('Enter a subject name.');
       return;
@@ -92,117 +121,146 @@ export function SubjectEditorModal({
     onSubmit({
       name: name.trim(),
       professor: professor.trim(),
-      icon,
+      icon: subject?.icon ?? 'book-open-variant',
+      iconId: finalIconId,
+      iconSelectionSource,
       color,
       classesHeld: held,
       classesAttended: attended,
     });
-    onClose();
+    close();
   };
 
   const editing = !!subject;
+  const selectedIcon = getSubjectIcon(iconId);
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.overlay}
+    <>
+      <Modal
+        visible={visible}
+        transparent
+        animationType="slide"
+        onRequestClose={close}
       >
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
-          <View style={styles.headingRow}>
-            <View>
-              <Text style={styles.title}>
-                {editing ? 'Edit subject' : 'Add a subject'}
-              </Text>
-              <Text style={styles.subtitle}>
-                {editing
-                  ? 'Correct details without losing attendance.'
-                  : 'Start tracking a new class.'}
-              </Text>
-            </View>
-            <Pressable onPress={onClose} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" color={colors.text} size={20} />
-            </Pressable>
-          </View>
-
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <Text style={styles.label}>Subject name</Text>
-            <TextInput
-              value={name}
-              onChangeText={(value) => {
-                setName(value);
-                setError(null);
-              }}
-              placeholder="e.g. Business Statistics"
-              placeholderTextColor={colors.faint}
-              style={styles.input}
-              autoFocus
-            />
-
-            <Text style={styles.label}>Faculty / professor (optional)</Text>
-            <TextInput
-              value={professor}
-              onChangeText={setProfessor}
-              placeholder="e.g. Prof. Rao"
-              placeholderTextColor={colors.faint}
-              style={styles.input}
-            />
-
-            <Text style={styles.label}>Subject icon</Text>
-            <View style={styles.iconRow}>
-              {subjectIcons.map((item) => {
-                const selected = icon === item;
-                return (
-                  <Pressable
-                    key={item}
-                    accessibilityLabel={`Use ${item} icon`}
-                    onPress={() => setIcon(item)}
-                    style={[
-                      styles.iconOption,
-                      selected && {
-                        borderColor: color,
-                        backgroundColor: `${color}1F`,
-                      },
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      name={item}
-                      color={selected ? color : colors.muted}
-                      size={20}
-                    />
-                  </Pressable>
-                );
-              })}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.overlay}
+        >
+          <Pressable style={StyleSheet.absoluteFill} onPress={close} />
+          <View style={styles.sheet}>
+            <View style={styles.handle} />
+            <View style={styles.headingRow}>
+              <View>
+                <Text style={styles.title}>
+                  {editing ? 'Edit subject' : 'Add a subject'}
+                </Text>
+                <Text style={styles.subtitle}>
+                  {editing
+                    ? 'Correct details without losing attendance.'
+                    : 'Start tracking a new class.'}
+                </Text>
+              </View>
+              <Pressable onPress={close} style={styles.closeButton}>
+                <MaterialCommunityIcons name="close" color={colors.text} size={20} />
+              </Pressable>
             </View>
 
-            <Text style={styles.label}>Subject color</Text>
-            <View style={styles.palette}>
-              {subjectColors.map((item) => (
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <Text style={styles.label}>Subject name</Text>
+              <View style={styles.nameRow}>
+                <TextInput
+                  value={name}
+                  onChangeText={(value) => {
+                    setName(value);
+                    setError(null);
+                  }}
+                  placeholder="e.g. Business Statistics"
+                  placeholderTextColor={colors.faint}
+                  style={[styles.input, styles.nameInput]}
+                  autoFocus
+                />
                 <Pressable
-                  key={item}
-                  accessibilityLabel={`Use color ${item}`}
-                  onPress={() => setColor(item)}
-                  style={[
-                    styles.swatch,
-                    { backgroundColor: item },
-                    color === item && styles.swatchSelected,
+                  accessibilityRole="button"
+                  accessibilityLabel={`Change ${selectedIcon.label} icon`}
+                  onPress={() => setPickerVisible(true)}
+                  style={({ pressed }) => [
+                    styles.liveIcon,
+                    pressed && styles.pressed,
                   ]}
                 >
-                  {color === item ? (
-                    <MaterialCommunityIcons
-                      name="check"
-                      color={colors.background}
-                      size={17}
-                    />
-                  ) : null}
+                  <SubjectIconImage iconId={iconId} size={47} />
+                  <Text style={styles.changeIcon}>Change</Text>
                 </Pressable>
-              ))}
-            </View>
+              </View>
+              <View style={styles.iconMeta}>
+                <View style={styles.iconMetaCopy}>
+                  <MaterialCommunityIcons
+                    name={
+                      iconSelectionSource === 'auto'
+                        ? 'auto-fix'
+                        : 'gesture-tap-button'
+                    }
+                    color={
+                      iconSelectionSource === 'auto'
+                        ? colors.lime
+                        : colors.cyan
+                    }
+                    size={15}
+                  />
+                  <Text style={styles.iconMetaText} numberOfLines={1}>
+                    {iconSelectionSource === 'auto'
+                      ? `Suggested: ${selectedIcon.label}`
+                      : `Manual: ${selectedIcon.label}`}
+                  </Text>
+                </View>
+                {iconSelectionSource === 'manual' ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => {
+                      setIconSelectionSource('auto');
+                      setIconId(suggestSubjectIcon(name).id);
+                    }}
+                  >
+                    <Text style={styles.useAuto}>Use auto</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+
+              <Text style={styles.label}>Faculty / professor (optional)</Text>
+              <TextInput
+                value={professor}
+                onChangeText={setProfessor}
+                placeholder="e.g. Prof. Rao"
+                placeholderTextColor={colors.faint}
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Subject color</Text>
+              <View style={styles.palette}>
+                {subjectColors.map((item) => (
+                  <Pressable
+                    key={item}
+                    accessibilityLabel={`Use color ${item}`}
+                    onPress={() => setColor(item)}
+                    style={[
+                      styles.swatch,
+                      { backgroundColor: item },
+                      color === item && styles.swatchSelected,
+                    ]}
+                  >
+                    {color === item ? (
+                      <MaterialCommunityIcons
+                        name="check"
+                        color={colors.background}
+                        size={17}
+                      />
+                    ) : null}
+                  </Pressable>
+                ))}
+              </View>
 
             <Text style={styles.label}>Opening attendance totals</Text>
             <Text style={styles.openingHint}>
@@ -280,10 +338,21 @@ export function SubjectEditorModal({
                 </Text>
               </Pressable>
             </View>
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+      <SubjectIconPickerModal
+        visible={pickerVisible}
+        selectedIconId={iconId}
+        onClose={() => setPickerVisible(false)}
+        onSelect={(selectedIconId) => {
+          setIconId(selectedIconId);
+          setIconSelectionSource('manual');
+          setPickerVisible(false);
+        }}
+      />
+    </>
   );
 }
 
@@ -355,20 +424,62 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 14,
   },
-  iconRow: {
-    marginBottom: 17,
+  nameRow: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'stretch',
+    gap: 10,
   },
-  iconOption: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
+  nameInput: {
+    flex: 1,
+  },
+  liveIcon: {
+    width: 70,
+    height: 64,
+    borderRadius: radii.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  changeIcon: {
+    marginTop: -2,
+    color: colors.cyan,
+    fontFamily: fonts.semiBold,
+    fontSize: 8,
+  },
+  iconMeta: {
+    minHeight: 34,
+    marginTop: -7,
+    marginBottom: 16,
+    paddingHorizontal: 10,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: `${colors.cyan}08`,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  iconMetaCopy: {
+    minWidth: 0,
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  iconMetaText: {
+    minWidth: 0,
+    flex: 1,
+    color: colors.textSecondary,
+    fontFamily: fonts.medium,
+    fontSize: 9.5,
+  },
+  useAuto: {
+    color: colors.lime,
+    fontFamily: fonts.semiBold,
+    fontSize: 9,
   },
   palette: {
     marginBottom: 18,

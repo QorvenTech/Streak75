@@ -11,6 +11,7 @@ import {
 } from 'react';
 
 import { createInitialState, DEFAULT_SETTINGS } from '../data/defaults';
+import { suggestSubjectIcon } from '../constants/subjectIconMap';
 import {
   queueRecordDelete,
   queueRecordWrite,
@@ -35,6 +36,21 @@ import {
 
 const STORAGE_KEY = '@streak75/state/v1';
 
+function normalizeSubject(subject: Subject): Subject {
+  const calculated = recalculateSubjectTotals(subject);
+  if (calculated.iconId) {
+    return {
+      ...calculated,
+      iconSelectionSource: calculated.iconSelectionSource ?? 'manual',
+    };
+  }
+  return {
+    ...calculated,
+    iconId: suggestSubjectIcon(calculated.name).id,
+    iconSelectionSource: 'auto',
+  };
+}
+
 interface AppContextValue extends PersistedAppState {
   hydrated: boolean;
   selectedSubject: Subject | undefined;
@@ -49,7 +65,15 @@ interface AppContextValue extends PersistedAppState {
   upsertNote: (subjectId: string, date: string, note: string) => void;
   addSubject: (
     input: Pick<Subject, 'name' | 'professor' | 'icon' | 'color'> &
-      Partial<Pick<Subject, 'classesHeld' | 'classesAttended'>>,
+      Partial<
+        Pick<
+          Subject,
+          | 'iconId'
+          | 'iconSelectionSource'
+          | 'classesHeld'
+          | 'classesAttended'
+        >
+      >,
   ) => string;
   updateSubject: (subjectId: string, update: Partial<Subject>) => void;
   deleteSubject: (subjectId: string) => void;
@@ -77,8 +101,8 @@ export function AppProvider({ children }: PropsWithChildren) {
           ...current,
           ...parsed,
           subjects: Array.isArray(parsed.subjects)
-            ? parsed.subjects.map(recalculateSubjectTotals)
-            : current.subjects.map(recalculateSubjectTotals),
+            ? parsed.subjects.map(normalizeSubject)
+            : current.subjects.map(normalizeSubject),
           settings: { ...current.settings, ...parsed.settings },
           profile: { ...current.profile, ...parsed.profile },
         }));
@@ -193,7 +217,15 @@ export function AppProvider({ children }: PropsWithChildren) {
   const addSubject = useCallback(
     (
       input: Pick<Subject, 'name' | 'professor' | 'icon' | 'color'> &
-        Partial<Pick<Subject, 'classesHeld' | 'classesAttended'>>,
+        Partial<
+          Pick<
+            Subject,
+            | 'iconId'
+            | 'iconSelectionSource'
+            | 'classesHeld'
+            | 'classesAttended'
+          >
+        >,
     ): string => {
       const id = Crypto.randomUUID();
       const now = new Date().toISOString();
@@ -205,6 +237,8 @@ export function AppProvider({ children }: PropsWithChildren) {
       const next: Subject = {
         ...input,
         id,
+        iconId: input.iconId ?? suggestSubjectIcon(input.name).id,
+        iconSelectionSource: input.iconSelectionSource ?? 'auto',
         favorite: false,
         openingClassesHeld: classesHeld,
         openingClassesAttended: classesAttended,
@@ -228,7 +262,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const updateSubject = useCallback((subjectId: string, update: Partial<Subject>) => {
     const item = state.subjects.find((subject) => subject.id === subjectId);
     if (!item) return;
-    const next = recalculateSubjectTotals({
+    const next = normalizeSubject({
       ...item,
       ...update,
       id: item.id,
@@ -302,7 +336,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       ...current,
       ...incoming,
       subjects: (incoming.subjects ?? current.subjects).map(
-        recalculateSubjectTotals,
+        normalizeSubject,
       ),
       settings: { ...current.settings, ...incoming.settings },
       profile: { ...current.profile, ...incoming.profile },

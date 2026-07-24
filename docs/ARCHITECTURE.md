@@ -31,6 +31,21 @@ The merged result is stored locally and then submitted to Firestore.
 The manual Sync action waits for native Firestore pending writes, with a timeout
 that returns the UI to an offline state instead of blocking indefinitely.
 
+## Subject icon selection
+
+The icon catalog contains 110 transparent 128px WebP assets plus a generic book
+fallback. `subjectIconMap.ts` normalizes case and punctuation and scores exact
+aliases, contained phrases, and in-progress prefixes. Add/Edit Subject debounces
+this matcher by 180ms while showing a live preview.
+
+Selecting an icon from the searchable grid stores both `iconId` and
+`iconSelectionSource: "manual"`. Manual choices are never changed when the
+subject name is edited unless the user explicitly taps **Use auto**. Legacy
+subjects without `iconId` are migrated from their name while preserving the old
+vector `icon` field as a rendering fallback. The complete subject object,
+including the final icon choice, follows the same AsyncStorage/Firestore write
+path as every other subject edit.
+
 ## Attendance semantics
 
 - `present`: held +1, attended +1
