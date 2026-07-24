@@ -1,5 +1,6 @@
 import { ColorBand, PersistedAppState, Subject, UserSettings } from '../types';
 import { toDateKey } from '../utils/dates';
+import { recordTotals } from '../utils/records';
 
 export const DEFAULT_COLOR_BANDS: ColorBand[] = [
   { id: 'excellent', label: 'Excellent', minimum: 85, color: '#65D83A' },
@@ -28,19 +29,33 @@ const subject = (
   classesAttended: number,
   classesHeld: number,
   favorite = false,
-): Subject => ({
-  id,
-  name,
-  professor,
-  icon,
-  color,
-  favorite,
-  classesAttended,
-  classesHeld,
-  records: makeMonthRecords(id),
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-});
+): Subject => {
+  const records = makeMonthRecords(id);
+  const dated = recordTotals(records);
+  const openingClassesAttended = Math.max(
+    0,
+    classesAttended - dated.attended,
+  );
+  const openingClassesHeld = Math.max(
+    openingClassesAttended,
+    classesHeld - dated.held,
+  );
+  return {
+    id,
+    name,
+    professor,
+    icon,
+    color,
+    favorite,
+    openingClassesAttended,
+    openingClassesHeld,
+    classesAttended,
+    classesHeld,
+    records,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+};
 
 function makeMonthRecords(seed: string): Subject['records'] {
   const now = new Date();

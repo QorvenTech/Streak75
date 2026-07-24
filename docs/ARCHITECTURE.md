@@ -8,12 +8,14 @@ back to the device.
 
 Attendance mutations follow this order:
 
-1. Calculate the new denormalized subject totals and dated record.
-2. Update the in-memory store immediately.
-3. Persist the store to AsyncStorage.
-4. If native Firebase is configured and a user is signed in, submit the subject
+1. Save status and note as one atomic dated-record operation.
+2. Recalculate denormalized totals from the subject's opening balance plus all
+   dated record contributions.
+3. Update the in-memory store immediately.
+4. Persist the store to AsyncStorage.
+5. If native Firebase is configured and a user is signed in, submit the subject
    and record write to Firestore.
-5. Let Firestore's native persistent queue retain the write while offline and
+6. Let Firestore's native persistent queue retain the write while offline and
    flush it when connectivity returns.
 
 The UI never waits for authentication or network connectivity before allowing a
@@ -39,7 +41,8 @@ that returns the UI to an offline state instead of blocking indefinitely.
 
 Editing an existing date removes the prior status contribution before applying
 the new contribution. Notes are attached to the dated record and do not affect
-totals.
+totals. Clearing a date removes its entire contribution. Legacy local subjects
+are migrated by inferring an opening balance that preserves their current totals.
 
 Overall attendance is weighted:
 

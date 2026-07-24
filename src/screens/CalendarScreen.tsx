@@ -18,8 +18,8 @@ export function CalendarScreen() {
     selectedSubject,
     settings,
     setSelectedSubjectId,
-    markAttendance,
-    upsertNote,
+    saveAttendanceRecord,
+    removeAttendanceRecord,
   } = useApp();
   const [month, setMonth] = useState(new Date());
   const [editorDate, setEditorDate] = useState<string | null>(null);
@@ -106,9 +106,13 @@ export function CalendarScreen() {
         onClose={() => setEditorDate(null)}
         onSave={(status, note) => {
           if (!editorDate) return;
-          markAttendance(selectedSubject.id, editorDate, status);
-          upsertNote(selectedSubject.id, editorDate, note);
+          saveAttendanceRecord(selectedSubject.id, editorDate, status, note);
         }}
+        onDelete={
+          editorDate
+            ? () => removeAttendanceRecord(selectedSubject.id, editorDate)
+            : undefined
+        }
       />
     </Screen>
   );

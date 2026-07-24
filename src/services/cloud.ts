@@ -47,6 +47,13 @@ export async function queueRecordWrite(
   return undefined;
 }
 
+export async function queueRecordDelete(
+  _subjectId: string,
+  _date: string,
+): Promise<void> {
+  return undefined;
+}
+
 export async function queueSubjectDelete(_subject: Subject): Promise<void> {
   return undefined;
 }

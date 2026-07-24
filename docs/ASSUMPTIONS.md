@@ -3,8 +3,9 @@
 The approved prototype is visually detailed but leaves a few behavioral choices
 open. Streak75 uses the following explicit assumptions:
 
-1. **Quick actions target the most recently selected subject.** Opening a subject
-   or choosing one in Calendar/Bunk Meter makes it the active subject.
+1. **Quick actions target the explicitly selected subject.** The dashboard shows
+   subject chips, and opening a subject or choosing one in Calendar/Bunk Meter
+   also makes it active.
 2. **Overall attendance is weighted by classes held.** A subject with 50 classes
    has more effect than a subject with 10 classes.
 3. **Leave is not attendance credit.** It counts as a held class but not an
@@ -31,3 +32,7 @@ open. Streak75 uses the following explicit assumptions:
 12. **The attached composition is a style reference, not a literal screen
     dimension.** Layouts preserve its density, navy surfaces, borders, lime/cyan
     accents, gauges, and status hierarchy while remaining responsive on phones.
+13. **Starting totals are an opening balance.** They represent classes recorded
+    before the student starts adding dated entries. Every dated record is applied
+    on top, can be corrected atomically, and can be cleared without changing the
+    opening balance.

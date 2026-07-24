@@ -19,6 +19,12 @@ export interface Subject {
   icon: string;
   color: string;
   favorite: boolean;
+  /**
+   * Totals that existed before the user started adding dated records.
+   * Optional for backward compatibility with locally persisted v1 data.
+   */
+  openingClassesHeld?: number;
+  openingClassesAttended?: number;
   classesHeld: number;
   classesAttended: number;
   records: Record<string, AttendanceRecord>;

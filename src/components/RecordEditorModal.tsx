@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -29,6 +30,7 @@ interface RecordEditorContentProps {
   record?: AttendanceRecord;
   onClose: () => void;
   onSave: (status: AttendanceStatus, note: string) => void;
+  onDelete?: () => void;
 }
 
 function RecordEditorContent({
@@ -36,6 +38,7 @@ function RecordEditorContent({
   record,
   onClose,
   onSave,
+  onDelete,
 }: RecordEditorContentProps) {
   const [status, setStatus] = useState<AttendanceStatus>(record?.status ?? 'present');
   const [note, setNote] = useState(record?.note ?? '');
@@ -87,6 +90,30 @@ function RecordEditorContent({
         <Pressable onPress={onClose} style={styles.cancel}>
           <Text style={styles.cancelText}>Cancel</Text>
         </Pressable>
+        {record && onDelete ? (
+          <Pressable
+            onPress={() =>
+              Alert.alert(
+                'Clear this date?',
+                'The attendance status and note for this date will be removed.',
+                [
+                  { text: 'Keep record', style: 'cancel' },
+                  {
+                    text: 'Clear',
+                    style: 'destructive',
+                    onPress: () => {
+                      onDelete();
+                      onClose();
+                    },
+                  },
+                ],
+              )
+            }
+            style={styles.delete}
+          >
+            <Text style={styles.deleteText}>Clear</Text>
+          </Pressable>
+        ) : null}
         <Pressable
           onPress={() => {
             onSave(status, note);
@@ -107,6 +134,7 @@ interface RecordEditorModalProps {
   record?: AttendanceRecord;
   onClose: () => void;
   onSave: (status: AttendanceStatus, note: string) => void;
+  onDelete?: () => void;
 }
 
 export function RecordEditorModal({
@@ -115,6 +143,7 @@ export function RecordEditorModal({
   record,
   onClose,
   onSave,
+  onDelete,
 }: RecordEditorModalProps) {
   return (
     <Modal visible={visible && !!date} transparent animationType="slide" onRequestClose={onClose}>
@@ -130,6 +159,7 @@ export function RecordEditorModal({
             record={record}
             onClose={onClose}
             onSave={onSave}
+            onDelete={onDelete}
           />
         ) : null}
       </KeyboardAvoidingView>
@@ -225,6 +255,20 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     color: colors.textSecondary,
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+  },
+  delete: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: `${colors.danger}88`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteText: {
+    color: colors.danger,
     fontFamily: fonts.semiBold,
     fontSize: 12,
   },

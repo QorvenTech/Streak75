@@ -46,7 +46,7 @@ Tunnel mode may ask permission to install Expo's tunnel helper the first time.
 ## Features available in Expo Go
 
 - All five tabs and responsive dark UI
-- Add subjects with starting attendance totals
+- Add, edit, favorite, and delete subjects with opening attendance totals
 - Present/Absent quick actions
 - Subject calendar and record editing
 - Leave, Holiday, and No class states
@@ -69,15 +69,17 @@ Expo Go cannot load native libraries that are not already compiled into it.
 
 ## Suggested test checklist
 
-1. Add a subject with held/attended totals.
-2. Mark Present, restart Expo Go, and confirm the data remains.
-3. Edit the same calendar date to Absent and verify totals are corrected.
-4. Add a note and confirm its yellow calendar marker.
-5. Compare Bunk Meter results against known totals.
-6. Change target and attendance bands and verify every card.
-7. Set the reminder 2-3 minutes ahead, background Expo Go, and check delivery.
-8. Export one subject to PDF and Excel.
-9. Enable airplane mode and repeat local attendance edits.
+1. Add a subject with opening held/attended totals.
+2. Select a previous date, save Present with a note, and verify both persist.
+3. Edit the same date to Absent and verify held stays fixed while attended drops.
+4. Clear that date and verify the opening totals are restored.
+5. Edit the subject spelling, faculty, icon, color, and opening totals.
+6. Restart Expo Go and confirm the subject and dated records remain.
+7. Compare Bunk Meter results against the corrected totals.
+8. Change target and attendance bands and verify every card.
+9. Set the reminder 2-3 minutes ahead, background Expo Go, and check delivery.
+10. Export one subject to PDF and Excel.
+11. Enable airplane mode and repeat local attendance edits.
 
 ## Switch back to the launch branch
 

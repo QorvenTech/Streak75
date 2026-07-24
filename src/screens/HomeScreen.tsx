@@ -7,9 +7,15 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-import { AddSubjectModal } from '../components/AddSubjectModal';
 import { AppHeader } from '../components/AppHeader';
 import { Card } from '../components/Card';
 import { CircularProgress } from '../components/CircularProgress';
@@ -19,6 +25,7 @@ import { QuickAction } from '../components/QuickAction';
 import { Screen } from '../components/Screen';
 import { SectionHeader } from '../components/SectionHeader';
 import { SubjectCard } from '../components/SubjectCard';
+import { SubjectEditorModal } from '../components/SubjectEditorModal';
 import { colors, fonts, radii } from '../constants/theme';
 import { RootStackParamList, TabParamList } from '../navigation/types';
 import { useApp } from '../store/AppProvider';
@@ -40,10 +47,23 @@ export function HomeScreen() {
     markAttendance,
     upsertNote,
     addSubject,
+    setSelectedSubjectId,
   } = useApp();
   const [noteVisible, setNoteVisible] = useState(false);
   const [addSubjectVisible, setAddSubjectVisible] = useState(false);
   const totals = useMemo(() => aggregateSubjects(subjects), [subjects]);
+  const orderedSubjects = useMemo(
+    () =>
+      subjects
+        .map((subject, index) => ({ subject, index }))
+        .sort(
+          (a, b) =>
+            Number(b.subject.favorite) - Number(a.subject.favorite) ||
+            a.index - b.index,
+        )
+        .map(({ subject }) => subject),
+    [subjects],
+  );
   const overallBand = getColorBand(totals.percentage, settings.colorBands);
   const today = toDateKey(new Date());
 
@@ -138,7 +158,7 @@ export function HomeScreen() {
         onActionPress={() => setAddSubjectVisible(true)}
       />
       <View style={styles.subjectList}>
-        {subjects.map((subject) => {
+        {orderedSubjects.map((subject) => {
           const percentage =
             subject.classesHeld > 0
               ? (subject.classesAttended / subject.classesHeld) * 100
@@ -148,15 +168,56 @@ export function HomeScreen() {
               key={subject.id}
               subject={subject}
               band={getColorBand(percentage, settings.colorBands)}
-              onPress={() =>
-                navigation.navigate('SubjectDetail', { subjectId: subject.id })
-              }
+              onPress={() => {
+                setSelectedSubjectId(subject.id);
+                navigation.navigate('SubjectDetail', { subjectId: subject.id });
+              }}
             />
           );
         })}
       </View>
 
       <SectionHeader title="Quick actions" />
+      {subjects.length ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.quickSubjectSelector}
+        >
+          {orderedSubjects.map((subject) => {
+            const active = selectedSubject?.id === subject.id;
+            return (
+              <Pressable
+                key={subject.id}
+                onPress={() => setSelectedSubjectId(subject.id)}
+                style={[
+                  styles.quickSubjectChip,
+                  active && {
+                    borderColor: subject.color,
+                    backgroundColor: `${subject.color}1F`,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.quickSubjectDot,
+                    { backgroundColor: subject.color },
+                  ]}
+                />
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.quickSubjectText,
+                    active && styles.quickSubjectTextActive,
+                  ]}
+                >
+                  {subject.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      ) : null}
       <Text style={styles.selectedHint}>
         Marking for{' '}
         <Text style={styles.selectedName}>
@@ -233,7 +294,7 @@ export function HomeScreen() {
           if (selectedSubject) upsertNote(selectedSubject.id, today, note);
         }}
       />
-      <AddSubjectModal
+      <SubjectEditorModal
         visible={addSubjectVisible}
         onClose={() => setAddSubjectVisible(false)}
         onSubmit={addSubject}
@@ -330,7 +391,7 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   selectedHint: {
-    marginTop: -3,
+    marginTop: 1,
     marginBottom: 8,
     color: colors.muted,
     fontFamily: fonts.regular,
@@ -339,6 +400,36 @@ const styles = StyleSheet.create({
   selectedName: {
     color: colors.cyan,
     fontFamily: fonts.semiBold,
+  },
+  quickSubjectSelector: {
+    paddingBottom: 6,
+    gap: 7,
+  },
+  quickSubjectChip: {
+    maxWidth: 150,
+    minHeight: 34,
+    paddingHorizontal: 10,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  quickSubjectDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  quickSubjectText: {
+    flexShrink: 1,
+    color: colors.muted,
+    fontFamily: fonts.medium,
+    fontSize: 9.5,
+  },
+  quickSubjectTextActive: {
+    color: colors.text,
   },
   quickActions: {
     marginBottom: 12,

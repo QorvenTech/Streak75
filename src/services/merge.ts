@@ -1,4 +1,5 @@
 import { PersistedAppState, Subject } from '../types';
+import { recalculateSubjectTotals } from '../utils/records';
 
 const mergeSubject = (local: Subject, cloud: Subject): Subject => {
   const records = { ...cloud.records, ...local.records };
@@ -10,7 +11,7 @@ const mergeSubject = (local: Subject, cloud: Subject): Subject => {
       localRecord.updatedAt >= cloudRecord.updatedAt ? localRecord : cloudRecord;
   });
   const newest = local.updatedAt >= cloud.updatedAt ? local : cloud;
-  return { ...newest, records };
+  return recalculateSubjectTotals({ ...newest, records });
 };
 
 export function mergeCloudState(
@@ -28,7 +29,7 @@ export function mergeCloudState(
   return {
     ...local,
     ...cloud,
-    subjects: [...subjectsById.values()],
+    subjects: [...subjectsById.values()].map(recalculateSubjectTotals),
     settings: cloud.settings ?? local.settings,
     profile: { ...local.profile, ...cloud.profile },
     selectedSubjectId:
