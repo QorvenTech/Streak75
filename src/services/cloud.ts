@@ -248,6 +248,7 @@ export async function queueUserSettingsWrite(
       targetAttendance: settings.targetPercentage,
       colorBands: settings.colorBands,
       notificationPreferences: settings.notifications,
+      cardAppearance: settings.cardAppearance,
       applyBandsGlobally: settings.applyBandsGlobally,
       updatedAt: new Date().toISOString(),
     }),
@@ -273,6 +274,7 @@ export async function syncAllToCloud(
         targetAttendance: state.settings.targetPercentage,
         colorBands: state.settings.colorBands,
         notificationPreferences: state.settings.notifications,
+        cardAppearance: state.settings.cardAppearance,
         applyBandsGlobally: state.settings.applyBandsGlobally,
         updatedAt: new Date().toISOString(),
       }),
@@ -355,6 +357,11 @@ export async function pullFromCloud(
             dailyReminderEnabled: true,
             reminderTime: '07:30',
             lowAttendanceAlertEnabled: true,
+          },
+        cardAppearance:
+          (userData.cardAppearance as UserSettings['cardAppearance']) ?? {
+            percentageColorMode: 'white',
+            subjectNameColorMode: 'white',
           },
         applyBandsGlobally:
           typeof userData.applyBandsGlobally === 'boolean'

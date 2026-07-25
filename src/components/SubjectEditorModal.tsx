@@ -85,21 +85,24 @@ export function SubjectEditorModal({
 
   useEffect(() => {
     if (!visible) return;
-    const opening = subject ? openingTotals(subject) : { held: 0, attended: 0 };
-    const suggested = suggestSubjectIcon(subject?.name ?? '');
-    setName(subject?.name ?? '');
-    setProfessor(subject?.professor ?? '');
-    setIconId(subject?.iconId ?? suggested.id);
-    setIconSelectionSource(
-      subject?.iconId
-        ? (subject.iconSelectionSource ?? 'manual')
-        : 'auto',
-    );
-    setColor(subject?.color ?? colors.lime);
-    setClassesHeld(opening.held ? `${opening.held}` : '');
-    setClassesAttended(opening.attended ? `${opening.attended}` : '');
-    setError(null);
-    setPickerVisible(false);
+    const timeout = setTimeout(() => {
+      const opening = subject ? openingTotals(subject) : { held: 0, attended: 0 };
+      const suggested = suggestSubjectIcon(subject?.name ?? '');
+      setName(subject?.name ?? '');
+      setProfessor(subject?.professor ?? '');
+      setIconId(subject?.iconId ?? suggested.id);
+      setIconSelectionSource(
+        subject?.iconId
+          ? (subject.iconSelectionSource ?? 'manual')
+          : 'auto',
+      );
+      setColor(subject?.color ?? colors.lime);
+      setClassesHeld(opening.held ? `${opening.held}` : '');
+      setClassesAttended(opening.attended ? `${opening.attended}` : '');
+      setError(null);
+      setPickerVisible(false);
+    }, 0);
+    return () => clearTimeout(timeout);
   }, [subject, visible]);
 
   useEffect(() => {

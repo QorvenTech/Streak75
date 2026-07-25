@@ -38,7 +38,9 @@ export function SubjectIconPickerModal({
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (visible) setQuery('');
+    if (!visible) return;
+    const timeout = setTimeout(() => setQuery(''), 0);
+    return () => clearTimeout(timeout);
   }, [visible]);
 
   const filteredIcons = useMemo(() => filterSubjectIcons(query), [query]);
