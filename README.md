@@ -24,9 +24,12 @@ up to Firestore, and exports print-ready PDF and Excel reports.
 - Editable attendance labels, thresholds, colors, global target, card text color
   modes, and live preview
 - Daily OS-scheduled local reminders and low-attendance notifications
-- Local-only use with AsyncStorage; native Firestore offline persistence when
-  Google backup is connected
-- Google Sign-In through React Native Firebase in an Expo development build
+- Silent anonymous Firebase Authentication on first launch, so Firestore backup
+  starts before the user connects Google
+- Native Firestore offline persistence plus AsyncStorage device persistence
+- In-place Google account linking that preserves the anonymous UID and data,
+  with an explicit existing-account conflict recovery path
+- One-time Google recovery prompt after three added subjects or three usage days
 - Firestore rules that restrict every user document and subcollection to its owner
 - EAS development, preview, and production build profiles
 - Unit tests for attendance math, subject icon matching, asset integrity, and
@@ -34,8 +37,7 @@ up to Firestore, and exports print-ready PDF and Excel reports.
 
 ## Tech
 
-- Expo SDK 54 / React Native 0.81 / TypeScript on this Expo Go test branch
-  (the launch branch remains on Expo SDK 56)
+- Expo SDK 56 / React Native 0.85 / TypeScript
 - React Navigation 7
 - React Native Firebase Auth + Firestore
 - `expo-notifications`, `expo-print`, `expo-sharing`, `expo-file-system`
@@ -51,12 +53,14 @@ npm install
 npm start
 ```
 
-Without Firebase service files, the app intentionally starts in local-only mode.
+Without a Firebase service file for the current platform, the app intentionally
+starts in local fallback mode.
 The development build uses prototype sample data so the approved design is
 immediately reviewable; release builds start with an empty subject list.
 
-Core local tracking and local notifications can be exercised without signing in.
-Google Sign-In and native Firestore require a development build:
+The configured native app silently creates an anonymous Firebase account while
+opening directly to Home. Google linking and native Firestore require a
+development build:
 
 ```bash
 npx expo prebuild
@@ -123,10 +127,11 @@ users/{uid}/subjects/{subjectId}/records/{YYYY-MM-DD}
   date, status, note, updatedAt
 ```
 
-Every local mutation is persisted to AsyncStorage first. When a signed-in native
-Firebase session exists, the same mutation is immediately submitted to Firestore.
-The native SDK accepts offline writes into its persistent local queue and sends
-them when connectivity returns.
+Every mutation is persisted to AsyncStorage first. Write methods await the
+silently initialized anonymous Firebase user, then immediately submit the same
+mutation under `users/{anonymousUid}`. The native SDK accepts offline writes into
+its persistent local queue and sends them when connectivity returns. Google
+linking normally preserves that UID.
 
 ## Environment and secrets
 

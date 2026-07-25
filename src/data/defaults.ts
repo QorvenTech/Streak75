@@ -186,6 +186,11 @@ export const createInitialState = (): PersistedAppState => ({
     syncStatus: 'local-only',
     lastSyncedAt: null,
   },
+  googleBackupPrompt: {
+    usageDates: [toDateKey(new Date())],
+    subjectsAddedCount: 0,
+    autoPromptShownAt: null,
+  },
   selectedSubjectId:
     typeof __DEV__ !== 'undefined' && __DEV__ ? 'economics' : null,
 });

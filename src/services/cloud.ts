@@ -1,6 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 
+import { DEFAULT_SETTINGS } from '../data/defaults';
 import {
   AttendanceRecord,
   PersistedAppState,
@@ -8,6 +10,10 @@ import {
   UserProfile,
   UserSettings,
 } from '../types';
+import {
+  firebaseAuthErrorCode,
+  isCredentialAlreadyInUseError,
+} from '../utils/firebaseAuthErrors';
 
 type AuthModule = typeof import('@react-native-firebase/auth');
 type FirestoreModule = typeof import('@react-native-firebase/firestore');
@@ -18,7 +24,21 @@ export interface CloudUser {
   displayName: string;
   email: string | null;
   photoURL: string | null;
+  isAnonymous: boolean;
 }
+
+export interface GoogleLinkResult {
+  user: CloudUser;
+  outcome: 'linked' | 'already-linked' | 'existing-account';
+  previousAnonymousUid?: string;
+}
+
+export interface ExistingAccountSwitch {
+  sourceAnonymousUid: string;
+  requestedAt: string;
+}
+
+const PENDING_ACCOUNT_SWITCH_KEY = '@streak75/pending-google-account-switch/v1';
 
 let modulePromise:
   | Promise<{
@@ -28,12 +48,25 @@ let modulePromise:
     }>
   | undefined;
 let googleConfigured = false;
+let anonymousAuthPromise: Promise<CloudUser> | undefined;
+let pendingAccountSwitch: ExistingAccountSwitch | null = null;
 
 export function isCloudConfigured(): boolean {
+  const configuredPlatforms = Constants.expoConfig?.extra
+    ?.firebaseConfiguredPlatforms as
+    | { android?: boolean; ios?: boolean }
+    | undefined;
+  const configuredForPlatform =
+    Platform.OS === 'android'
+      ? configuredPlatforms?.android
+      : Platform.OS === 'ios'
+        ? configuredPlatforms?.ios
+        : false;
   return (
     Platform.OS !== 'web' &&
     Constants.executionEnvironment !== ExecutionEnvironment.StoreClient &&
-    Constants.expoConfig?.extra?.firebaseConfigured === true
+    (configuredForPlatform ??
+      Constants.expoConfig?.extra?.firebaseConfigured === true)
   );
 }
 
@@ -71,10 +104,37 @@ const subjectDocument = (subject: Subject) => {
   return clean(document);
 };
 
+const toCloudUser = (user: {
+  uid: string;
+  displayName: string | null;
+  email: string | null;
+  photoURL: string | null;
+  isAnonymous: boolean;
+}): CloudUser => ({
+  uid: user.uid,
+  displayName: user.displayName ?? 'Student',
+  email: user.email,
+  photoURL: user.photoURL,
+  isAnonymous: user.isAnonymous,
+});
+
+export async function ensureAnonymousSession(): Promise<CloudUser> {
+  const { auth } = await getModules();
+  const firebaseAuth = auth.getAuth();
+  if (firebaseAuth.currentUser) return toCloudUser(firebaseAuth.currentUser);
+  anonymousAuthPromise ??= auth
+    .signInAnonymously(firebaseAuth)
+    .then((result) => toCloudUser(result.user));
+  try {
+    return await anonymousAuthPromise;
+  } finally {
+    anonymousAuthPromise = undefined;
+  }
+}
+
 const currentUserId = async (): Promise<string | null> => {
   if (!isCloudConfigured()) return null;
-  const { auth } = await getModules();
-  return auth.getAuth().currentUser?.uid ?? null;
+  return (await ensureAnonymousSession()).uid;
 };
 
 export function subscribeToAuth(
@@ -91,16 +151,7 @@ export function subscribeToAuth(
     .then(({ auth }) => {
       if (disposed) return;
       unsubscribe = auth.onAuthStateChanged(auth.getAuth(), (user) => {
-        listener(
-          user
-            ? {
-                uid: user.uid,
-                displayName: user.displayName ?? 'Student',
-                email: user.email,
-                photoURL: user.photoURL,
-              }
-            : null,
-        );
+        listener(user ? toCloudUser(user) : null);
       });
     })
     .catch((error: unknown) => {
@@ -112,30 +163,83 @@ export function subscribeToAuth(
   };
 }
 
-export async function signInWithGoogle(): Promise<CloudUser> {
+async function rememberPendingAccountSwitch(
+  sourceAnonymousUid: string,
+): Promise<void> {
+  pendingAccountSwitch = {
+    sourceAnonymousUid,
+    requestedAt: new Date().toISOString(),
+  };
+  await AsyncStorage.setItem(
+    PENDING_ACCOUNT_SWITCH_KEY,
+    JSON.stringify(pendingAccountSwitch),
+  );
+}
+
+async function clearPendingAccountSwitch(): Promise<void> {
+  pendingAccountSwitch = null;
+  await AsyncStorage.removeItem(PENDING_ACCOUNT_SWITCH_KEY);
+}
+
+export async function consumeExistingAccountSwitch(
+  targetUid: string,
+): Promise<ExistingAccountSwitch | null> {
+  let switchState = pendingAccountSwitch;
+  if (!switchState) {
+    const stored = await AsyncStorage.getItem(PENDING_ACCOUNT_SWITCH_KEY);
+    if (stored) {
+      try {
+        switchState = JSON.parse(stored) as ExistingAccountSwitch;
+      } catch {
+        switchState = null;
+      }
+    }
+  }
+  await clearPendingAccountSwitch();
+  return switchState?.sourceAnonymousUid !== targetUid ? switchState : null;
+}
+
+export async function linkAnonymousUserWithGoogle(): Promise<GoogleLinkResult> {
   const { auth, google } = await getModules();
   configureGoogle(google);
+  const firebaseAuth = auth.getAuth();
+  const currentUser = firebaseAuth.currentUser ?? (
+    await auth.signInAnonymously(firebaseAuth)
+  ).user;
+  if (!currentUser.isAnonymous) {
+    return {
+      user: toCloudUser(currentUser),
+      outcome: 'already-linked',
+    };
+  }
   await google.GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
   const response = await google.GoogleSignin.signIn();
   if (response.type !== 'success' || !response.data.idToken) {
     throw new Error('Google Sign-In was cancelled.');
   }
   const credential = auth.GoogleAuthProvider.credential(response.data.idToken);
-  const result = await auth.signInWithCredential(auth.getAuth(), credential);
-  return {
-    uid: result.user.uid,
-    displayName: result.user.displayName ?? 'Student',
-    email: result.user.email,
-    photoURL: result.user.photoURL,
-  };
-}
-
-export async function signOutFromGoogle(): Promise<void> {
-  const { auth, google } = await getModules();
-  await Promise.allSettled([
-    auth.signOut(auth.getAuth()),
-    google.GoogleSignin.signOut(),
-  ]);
+  try {
+    const result = await auth.linkWithCredential(currentUser, credential);
+    return {
+      user: toCloudUser(result.user),
+      outcome: 'linked',
+      previousAnonymousUid: currentUser.uid,
+    };
+  } catch (error) {
+    if (!isCredentialAlreadyInUseError(error)) throw error;
+    await rememberPendingAccountSwitch(currentUser.uid);
+    try {
+      const result = await auth.signInWithCredential(firebaseAuth, credential);
+      return {
+        user: toCloudUser(result.user),
+        outcome: 'existing-account',
+        previousAnonymousUid: currentUser.uid,
+      };
+    } catch (signInError) {
+      await clearPendingAccountSwitch();
+      throw signInError;
+    }
+  }
 }
 
 export async function queueSubjectWrite(subject: Subject): Promise<void> {
@@ -312,6 +416,7 @@ export async function syncAllToCloud(
 
 export async function pullFromCloud(
   user: CloudUser,
+  options: { includeEmpty?: boolean } = {},
 ): Promise<Partial<PersistedAppState>> {
   const { firestore } = await getModules();
   const database = firestore.getFirestore();
@@ -343,42 +448,46 @@ export async function pullFromCloud(
     }),
   );
 
-  const settings: UserSettings | undefined = userData
+  const hasSettingsData =
+    userData &&
+    (typeof userData.targetAttendance === 'number' ||
+      Array.isArray(userData.colorBands) ||
+      typeof userData.notificationPreferences === 'object' ||
+      typeof userData.cardAppearance === 'object' ||
+      typeof userData.applyBandsGlobally === 'boolean');
+  const settings: UserSettings | undefined = hasSettingsData
     ? {
         targetPercentage:
           typeof userData.targetAttendance === 'number'
             ? userData.targetAttendance
-            : 75,
+            : DEFAULT_SETTINGS.targetPercentage,
         colorBands: Array.isArray(userData.colorBands)
           ? (userData.colorBands as UserSettings['colorBands'])
-          : [],
+          : DEFAULT_SETTINGS.colorBands,
         notifications:
-          (userData.notificationPreferences as UserSettings['notifications']) ?? {
-            dailyReminderEnabled: true,
-            reminderTime: '07:30',
-            lowAttendanceAlertEnabled: true,
-          },
+          (userData.notificationPreferences as UserSettings['notifications']) ??
+          DEFAULT_SETTINGS.notifications,
         cardAppearance:
-          (userData.cardAppearance as UserSettings['cardAppearance']) ?? {
-            percentageColorMode: 'white',
-            subjectNameColorMode: 'white',
-          },
+          (userData.cardAppearance as UserSettings['cardAppearance']) ??
+          DEFAULT_SETTINGS.cardAppearance,
         applyBandsGlobally:
           typeof userData.applyBandsGlobally === 'boolean'
             ? userData.applyBandsGlobally
-            : true,
+            : DEFAULT_SETTINGS.applyBandsGlobally,
       }
-    : undefined;
+    : options.includeEmpty
+      ? clean(DEFAULT_SETTINGS)
+      : undefined;
 
   return {
-    ...(subjects.length ? { subjects } : {}),
-    ...(settings?.colorBands.length ? { settings } : {}),
+    ...(subjects.length || options.includeEmpty ? { subjects } : {}),
+    ...(settings ? { settings } : {}),
     profile: {
       uid: user.uid,
       displayName: user.displayName,
       email: user.email,
       photoURL: user.photoURL,
-      authMode: 'signed-in',
+      authMode: user.isAnonymous ? 'anonymous' : 'signed-in',
       syncStatus: 'up-to-date',
       lastSyncedAt: new Date().toISOString(),
     },
@@ -398,6 +507,9 @@ export async function waitForCloudSync(timeoutMs = 12_000): Promise<void> {
 
 export function readableCloudError(error: unknown): string {
   const fallback = 'Google backup could not be completed. Your local data is unchanged.';
+  if (firebaseAuthErrorCode(error) === 'auth/operation-not-allowed') {
+    return 'Enable Anonymous and Google sign-in providers in Firebase Authentication, then try again.';
+  }
   if (!(error instanceof Error)) return fallback;
   if (/cancel/i.test(error.message)) return 'Google Sign-In was cancelled.';
   if (/not configured/i.test(error.message)) return error.message;

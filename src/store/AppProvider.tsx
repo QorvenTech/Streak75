@@ -9,6 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { AppState } from 'react-native';
 
 import { createInitialState, DEFAULT_SETTINGS } from '../data/defaults';
 import { suggestSubjectIcon } from '../constants/subjectIconMap';
@@ -28,6 +29,7 @@ import {
   UserSettings,
 } from '../types';
 import { attendancePercentage } from '../utils/attendance';
+import { addUsageDate } from '../utils/googleBackupPrompt';
 import {
   recalculateSubjectTotals,
   removeSubjectRecord,
@@ -82,6 +84,7 @@ interface AppContextValue extends PersistedAppState {
   updateSettings: (update: Partial<UserSettings>) => void;
   resetSettings: () => void;
   updateProfile: (update: Partial<UserProfile>) => void;
+  markGoogleBackupPromptShown: () => void;
   replaceFromCloud: (state: Partial<PersistedAppState>) => void;
 }
 
@@ -97,6 +100,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       .then((stored) => {
         if (!stored || !active) return;
         const parsed = JSON.parse(stored) as Partial<PersistedAppState>;
+        const storedPrompt = parsed.googleBackupPrompt;
         setState((current) => ({
           ...current,
           ...parsed,
@@ -105,6 +109,17 @@ export function AppProvider({ children }: PropsWithChildren) {
             : current.subjects.map(normalizeSubject),
           settings: { ...current.settings, ...parsed.settings },
           profile: { ...current.profile, ...parsed.profile },
+          googleBackupPrompt: {
+            ...current.googleBackupPrompt,
+            ...storedPrompt,
+            usageDates: Array.isArray(storedPrompt?.usageDates)
+              ? storedPrompt.usageDates
+              : current.googleBackupPrompt.usageDates,
+            subjectsAddedCount:
+              typeof storedPrompt?.subjectsAddedCount === 'number'
+                ? storedPrompt.subjectsAddedCount
+                : (parsed.subjects?.length ?? 0),
+          },
         }));
       })
       .catch(() => undefined)
@@ -120,6 +135,26 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (!hydrated) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => undefined);
   }, [hydrated, state]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const recordToday = () => {
+      setState((current) => {
+        const nextPrompt = addUsageDate(current.googleBackupPrompt);
+        return nextPrompt === current.googleBackupPrompt
+          ? current
+          : { ...current, googleBackupPrompt: nextPrompt };
+      });
+    };
+    const timeout = setTimeout(recordToday, 0);
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') recordToday();
+    });
+    return () => {
+      clearTimeout(timeout);
+      subscription.remove();
+    };
+  }, [hydrated]);
 
   const saveAttendanceRecord = useCallback(
     (
@@ -252,6 +287,11 @@ export function AppProvider({ children }: PropsWithChildren) {
         ...current,
         subjects: [...current.subjects, next],
         selectedSubjectId: id,
+        googleBackupPrompt: {
+          ...current.googleBackupPrompt,
+          subjectsAddedCount:
+            current.googleBackupPrompt.subjectsAddedCount + 1,
+        },
       }));
       queueSubjectWrite(next).catch(() => undefined);
       return id;
@@ -331,6 +371,19 @@ export function AppProvider({ children }: PropsWithChildren) {
     }));
   }, []);
 
+  const markGoogleBackupPromptShown = useCallback(() => {
+    setState((current) => {
+      if (current.googleBackupPrompt.autoPromptShownAt) return current;
+      return {
+        ...current,
+        googleBackupPrompt: {
+          ...current.googleBackupPrompt,
+          autoPromptShownAt: new Date().toISOString(),
+        },
+      };
+    });
+  }, []);
+
   const replaceFromCloud = useCallback((incoming: Partial<PersistedAppState>) => {
     setState((current) => ({
       ...current,
@@ -362,6 +415,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       updateSettings,
       resetSettings,
       updateProfile,
+      markGoogleBackupPromptShown,
       replaceFromCloud,
     }),
     [
@@ -369,6 +423,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       deleteSubject,
       hydrated,
       markAttendance,
+      markGoogleBackupPromptShown,
       removeAttendanceRecord,
       replaceFromCloud,
       resetSettings,

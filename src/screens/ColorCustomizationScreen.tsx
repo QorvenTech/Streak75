@@ -493,20 +493,30 @@ export function ColorCustomizationScreen({ navigation }: Props) {
 
       <Text style={styles.sectionTitle}>Backup & sync</Text>
       <SettingsRow
-        icon={profile.authMode === 'signed-in' ? 'cloud-check-outline' : 'cloud-off-outline'}
-        iconColor={profile.authMode === 'signed-in' ? colors.cyan : colors.muted}
-        title={profile.authMode === 'signed-in' ? 'Google backup connected' : 'Local-only mode'}
+        icon={profile.authMode === 'local' ? 'cloud-off-outline' : 'cloud-check-outline'}
+        iconColor={profile.authMode === 'local' ? colors.muted : colors.cyan}
+        title={
+          profile.authMode === 'signed-in'
+            ? 'Google backup connected'
+            : profile.authMode === 'anonymous'
+              ? 'Anonymous cloud backup'
+              : 'Cloud unavailable'
+        }
         subtitle={
           profile.authMode === 'signed-in'
             ? `Last synced ${profile.lastSyncedAt ?? 'just now'}`
-            : 'Sign in from Profile to back up your data.'
+            : profile.authMode === 'anonymous'
+              ? 'Your data is cloud-backed; connect Google for phone recovery.'
+              : 'Complete Firebase setup to enable cloud backup.'
         }
         onPress={() =>
           Alert.alert(
             'Backup & sync',
             profile.authMode === 'signed-in'
-              ? 'Manual sync will run after Firebase credentials are configured.'
-              : 'Open Profile to connect Google backup.',
+              ? 'Your Google-linked cloud backup is active.'
+              : profile.authMode === 'anonymous'
+                ? 'Anonymous backup is active. Open Profile to connect Google for cross-device recovery.'
+                : 'Firebase is not configured in this build yet.',
           )
         }
       />

@@ -100,13 +100,19 @@ export function HomeScreen() {
           </View>
           <View style={styles.syncPill}>
             <MaterialCommunityIcons
-              name={profile.authMode === 'signed-in' ? 'cloud-check-outline' : 'cloud-off-outline'}
-              color={profile.authMode === 'signed-in' ? colors.cyan : colors.muted}
+              name={
+                profile.authMode === 'local'
+                  ? 'cloud-off-outline'
+                  : 'cloud-check-outline'
+              }
+              color={
+                profile.authMode === 'local' ? colors.muted : colors.cyan
+              }
               size={15}
             />
             <View>
               <Text style={styles.syncTitle}>
-                {profile.authMode === 'signed-in' ? 'Cloud sync' : 'Local mode'}
+                {profile.authMode === 'local' ? 'Cloud unavailable' : 'Cloud sync'}
               </Text>
               <Text
                 style={[
@@ -114,7 +120,13 @@ export function HomeScreen() {
                   profile.syncStatus === 'up-to-date' && { color: colors.success },
                 ]}
               >
-                {profile.syncStatus === 'up-to-date' ? 'Up to date' : 'Saved offline'}
+                {profile.syncStatus === 'up-to-date'
+                  ? 'Up to date'
+                  : profile.syncStatus === 'syncing'
+                    ? 'Syncing…'
+                    : profile.syncStatus === 'offline'
+                      ? 'Queued offline'
+                      : 'Starting…'}
               </Text>
             </View>
           </View>

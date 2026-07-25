@@ -7,8 +7,9 @@ const androidFirebaseFile =
 const iosFirebaseFile =
   process.env.GOOGLE_SERVICE_INFO_PLIST ?? './firebase/ios/GoogleService-Info.plist';
 
-const hasFirebaseFiles =
-  existsSync(resolve(androidFirebaseFile)) && existsSync(resolve(iosFirebaseFile));
+const hasAndroidFirebaseFile = existsSync(resolve(androidFirebaseFile));
+const hasIosFirebaseFile = existsSync(resolve(iosFirebaseFile));
+const hasAnyFirebaseFile = hasAndroidFirebaseFile || hasIosFirebaseFile;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -24,14 +25,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.qorventech.streak75',
-    ...(hasFirebaseFiles ? { googleServicesFile: iosFirebaseFile } : {}),
+    ...(hasIosFirebaseFile ? { googleServicesFile: iosFirebaseFile } : {}),
     infoPlist: {
       UIBackgroundModes: ['remote-notification'],
     },
   },
   android: {
     package: 'com.qorventech.streak75',
-    ...(hasFirebaseFiles ? { googleServicesFile: androidFirebaseFile } : {}),
+    ...(hasAndroidFirebaseFile ? { googleServicesFile: androidFirebaseFile } : {}),
     adaptiveIcon: {
       foregroundImage: './assets/android-icon-foreground.png',
       backgroundImage: './assets/android-icon-background.png',
@@ -79,7 +80,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         imageWidth: 180,
       },
     ],
-    ...(hasFirebaseFiles
+    ...(hasAnyFirebaseFile
       ? [
           '@react-native-firebase/app',
           '@react-native-firebase/auth',
@@ -88,7 +89,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       : []),
   ],
   extra: {
-    firebaseConfigured: hasFirebaseFiles,
+    firebaseConfigured: hasAnyFirebaseFile,
+    firebaseConfiguredPlatforms: {
+      android: hasAndroidFirebaseFile,
+      ios: hasIosFirebaseFile,
+    },
     googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
     eas: {
       projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID ?? '',

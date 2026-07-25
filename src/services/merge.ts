@@ -1,3 +1,4 @@
+import { DEFAULT_SETTINGS } from '../data/defaults';
 import { PersistedAppState, Subject } from '../types';
 import { recalculateSubjectTotals } from '../utils/records';
 
@@ -37,5 +38,26 @@ export function mergeCloudState(
       cloud.selectedSubjectId ??
       [...subjectsById.values()][0]?.id ??
       null,
+  };
+}
+
+export function activateExistingCloudAccount(
+  local: PersistedAppState,
+  cloud: Partial<PersistedAppState>,
+): PersistedAppState {
+  const subjects = (cloud.subjects ?? []).map(recalculateSubjectTotals);
+  const requestedSelection = cloud.selectedSubjectId;
+  const selectedSubjectId =
+    requestedSelection &&
+    subjects.some((subject) => subject.id === requestedSelection)
+      ? requestedSelection
+      : (subjects[0]?.id ?? null);
+  return {
+    ...local,
+    ...cloud,
+    subjects,
+    settings: cloud.settings ?? DEFAULT_SETTINGS,
+    profile: { ...local.profile, ...cloud.profile },
+    selectedSubjectId,
   };
 }

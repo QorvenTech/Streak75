@@ -9,12 +9,10 @@ import { Card } from '../components/Card';
 import { Screen } from '../components/Screen';
 import { SettingsRow } from '../components/SettingsRow';
 import { colors, fonts, radii } from '../constants/theme';
+import { useGoogleAccountLink } from '../hooks/useGoogleAccountLink';
 import { RootStackParamList, TabParamList } from '../navigation/types';
 import {
-  isCloudConfigured,
   readableCloudError,
-  signInWithGoogle,
-  signOutFromGoogle,
   syncAllToCloud,
   waitForCloudSync,
 } from '../services/cloud';
@@ -28,52 +26,22 @@ type ProfileNavigation = CompositeNavigationProp<
 export function ProfileScreen() {
   const navigation = useNavigation<ProfileNavigation>();
   const { profile, settings, subjects, updateProfile } = useApp();
-  const [cloudBusy, setCloudBusy] = useState(false);
+  const { googleLinkBusy, linkGoogleAccount } = useGoogleAccountLink();
+  const [syncBusy, setSyncBusy] = useState(false);
 
   const handleGoogleAccount = async () => {
-    if (!isCloudConfigured()) {
-      Alert.alert(
-        'Firebase setup required',
-        'Add the two Firebase service files, set your Google web client ID, and build the development client. Local attendance is fully available meanwhile.',
-      );
-      return;
-    }
-    setCloudBusy(true);
-    try {
-      if (profile.authMode === 'signed-in') {
-        await signOutFromGoogle();
-        updateProfile({
-          uid: null,
-          email: null,
-          photoURL: null,
-          authMode: 'local',
-          syncStatus: 'local-only',
-          lastSyncedAt: null,
-        });
-      } else {
-        const user = await signInWithGoogle();
-        updateProfile({
-          ...user,
-          authMode: 'signed-in',
-          syncStatus: 'syncing',
-        });
-      }
-    } catch (error) {
-      Alert.alert('Google backup', readableCloudError(error));
-    } finally {
-      setCloudBusy(false);
-    }
+    await linkGoogleAccount();
   };
 
   const handleManualSync = async () => {
-    if (!profile.uid || profile.authMode !== 'signed-in') {
+    if (!profile.uid || profile.authMode === 'local') {
       Alert.alert(
-        'Sign in for backup',
-        'You can keep tracking locally. Connect Google only when you want cloud backup.',
+        'Cloud account is starting',
+        'Your anonymous Firebase account has not initialized yet. Check your connection and try again.',
       );
       return;
     }
-    setCloudBusy(true);
+    setSyncBusy(true);
     updateProfile({ syncStatus: 'syncing' });
     try {
       await syncAllToCloud(profile.uid, { profile, settings, subjects });
@@ -87,7 +55,7 @@ export function ProfileScreen() {
       updateProfile({ syncStatus: 'offline' });
       Alert.alert('Cloud sync', readableCloudError(error));
     } finally {
-      setCloudBusy(false);
+      setSyncBusy(false);
     }
   };
 
@@ -106,19 +74,32 @@ export function ProfileScreen() {
         </View>
         <View style={styles.profileCopy}>
           <Text style={styles.name}>{profile.displayName}</Text>
-          <Text style={styles.email}>{profile.email ?? 'Local-only student profile'}</Text>
+          <Text style={styles.email}>
+            {profile.email ??
+              (profile.authMode === 'anonymous'
+                ? 'Anonymous cloud profile'
+                : 'Local fallback profile')}
+          </Text>
           <View style={styles.modePill}>
             <View
               style={[
                 styles.modeDot,
                 {
                   backgroundColor:
-                    profile.authMode === 'signed-in' ? colors.success : colors.warning,
+                    profile.authMode === 'signed-in'
+                      ? colors.success
+                      : profile.authMode === 'anonymous'
+                        ? colors.cyan
+                        : colors.warning,
                 },
               ]}
             />
             <Text style={styles.modeText}>
-              {profile.authMode === 'signed-in' ? 'Google connected' : 'Backup not connected'}
+              {profile.authMode === 'signed-in'
+                ? 'Google connected'
+                : profile.authMode === 'anonymous'
+                  ? 'Anonymous cloud backup'
+                  : 'Cloud temporarily unavailable'}
             </Text>
           </View>
         </View>
@@ -170,11 +151,11 @@ export function ProfileScreen() {
           subtitle={
             profile.authMode === 'signed-in'
               ? profile.email ?? 'Cloud backup enabled'
-              : 'Keep local tracking now; connect for cloud backup.'
+              : 'Connect for recovery when you switch phones or reinstall.'
           }
           onPress={handleGoogleAccount}
           right={
-            cloudBusy ? (
+            googleLinkBusy ? (
               <ActivityIndicator color={colors.cyan} size="small" />
             ) : undefined
           }
@@ -185,9 +166,16 @@ export function ProfileScreen() {
           subtitle={
             profile.lastSyncedAt
               ? `Last synced ${profile.lastSyncedAt}`
-              : 'Your local records are safe on this device.'
+              : profile.authMode === 'anonymous'
+                ? 'Anonymous cloud backup is initializing.'
+                : 'Waiting for Firebase configuration.'
           }
           onPress={handleManualSync}
+          right={
+            syncBusy ? (
+              <ActivityIndicator color={colors.cyan} size="small" />
+            ) : undefined
+          }
         />
       </View>
 
@@ -208,7 +196,7 @@ export function ProfileScreen() {
           onPress={() =>
             Alert.alert(
               'Privacy by design',
-              'Local records stay on your device. Cloud records are readable only by your signed-in Firebase account.',
+              'Every installation starts with a private anonymous Firebase UID. Firestore rules allow only that UID to access its data. Linking Google keeps the same UID unless an older Google-linked account already exists.',
             )
           }
         />

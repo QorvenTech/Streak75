@@ -69,7 +69,7 @@ export interface UserSettings {
   applyBandsGlobally: boolean;
 }
 
-export type AuthMode = 'local' | 'signed-in';
+export type AuthMode = 'local' | 'anonymous' | 'signed-in';
 export type SyncStatus = 'local-only' | 'syncing' | 'up-to-date' | 'offline' | 'error';
 
 export interface UserProfile {
@@ -82,9 +82,16 @@ export interface UserProfile {
   lastSyncedAt: string | null;
 }
 
+export interface GoogleBackupPromptState {
+  usageDates: string[];
+  subjectsAddedCount: number;
+  autoPromptShownAt: string | null;
+}
+
 export interface PersistedAppState {
   subjects: Subject[];
   settings: UserSettings;
   profile: UserProfile;
+  googleBackupPrompt: GoogleBackupPromptState;
   selectedSubjectId: string | null;
 }

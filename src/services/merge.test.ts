@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { createInitialState } from '../data/defaults';
 import { Subject } from '../types';
-import { mergeCloudState } from './merge';
+import { activateExistingCloudAccount, mergeCloudState } from './merge';
 
 const makeSubject = (
   id: string,
@@ -52,4 +52,37 @@ test('merges subjects and keeps the newest version of each record', () => {
   assert.equal(merged.subjects.length, 1);
   assert.equal(merged.subjects[0]?.updatedAt, cloud.updatedAt);
   assert.equal(merged.subjects[0]?.records['2026-07-24']?.note, 'local');
+});
+
+test('activates an older Google account without merging anonymous subjects', () => {
+  const base = createInitialState();
+  const anonymousSubject = makeSubject(
+    'anonymous-only',
+    '2026-07-24T08:00:00.000Z',
+    '2026-07-24T08:00:00.000Z',
+    'temporary phone data',
+  );
+  const existingSubject = makeSubject(
+    'existing-google',
+    '2026-07-24T09:00:00.000Z',
+    '2026-07-24T09:00:00.000Z',
+    'other device data',
+  );
+  const activated = activateExistingCloudAccount(
+    { ...base, subjects: [anonymousSubject] },
+    {
+      subjects: [existingSubject],
+      profile: {
+        ...base.profile,
+        uid: 'existing-google-uid',
+        authMode: 'signed-in',
+      },
+    },
+  );
+  assert.deepEqual(
+    activated.subjects.map((subject) => subject.id),
+    ['existing-google'],
+  );
+  assert.equal(activated.selectedSubjectId, 'existing-google');
+  assert.equal(activated.googleBackupPrompt, base.googleBackupPrompt);
 });

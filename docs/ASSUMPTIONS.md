@@ -22,8 +22,9 @@ open. Streak75 uses the following explicit assumptions:
    misleading state. The calculation utility still handles it explicitly.
 8. **Development builds show the approved prototype dataset.** Production
    release builds start empty so real students never inherit fake attendance.
-9. **Cloud is optional.** Signing out does not delete local records. Local
-   tracking continues when Google Sign-In is unavailable or the device is offline.
+9. **Google is optional; anonymous cloud backup is the default.** A configured
+   native build silently creates an anonymous Firebase UID. AsyncStorage keeps
+   tracking usable if Firebase is unavailable or the device is offline.
 10. **Google Sign-In uses native Android/iOS SDKs.** It therefore needs an Expo
     development/production build and is not expected to work in Expo Go.
 11. **Apple review may require Sign in with Apple.** The brief requests Google
@@ -43,3 +44,11 @@ open. Streak75 uses the following explicit assumptions:
     subject names remain white by default for maximum contrast. Users can opt
     into attendance-band or subject-accent colors, and the preference applies to
     all Home subject cards.
+16. **The numbered one-time-modal rule takes precedence over the earlier banner
+    wording.** No permanent Home sign-in banner is shown. The recovery modal
+    appears once after three subject creations or three distinct usage days, and
+    Google linking remains available in Profile afterward.
+17. **Existing Google-account conflicts do not silently merge accounts.** The
+    older Google-linked account becomes active, while this device's temporary
+    anonymous session is retained as a local safety snapshot and in its original
+    anonymous Firestore path.

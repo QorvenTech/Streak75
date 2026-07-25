@@ -10,6 +10,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from './src/constants/theme';
+import { GoogleBackupPromptModal } from './src/components/GoogleBackupPromptModal';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { CloudSyncBridge } from './src/services/CloudSyncBridge';
 import { AppProvider } from './src/store/AppProvider';
@@ -31,6 +32,7 @@ export default function App() {
       <AppProvider>
         <CloudSyncBridge />
         <AppNavigator />
+        <GoogleBackupPromptModal />
       </AppProvider>
       <StatusBar style="light" />
     </SafeAreaProvider>

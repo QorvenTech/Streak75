@@ -13,20 +13,45 @@ Attendance mutations follow this order:
    dated record contributions.
 3. Update the in-memory store immediately.
 4. Persist the store to AsyncStorage.
-5. If native Firebase is configured and a user is signed in, submit the subject
-   and record write to Firestore.
+5. If native Firebase is configured, await the persisted Firebase user or create
+   an anonymous user silently, then submit the subject and record write under
+   that UID.
 6. Let Firestore's native persistent queue retain the write while offline and
    flush it when connectivity returns.
 
 The UI never waits for authentication or network connectivity before allowing a
 class to be marked.
 
+## Anonymous-first authentication
+
+`CloudSyncBridge` never gates rendering. Home remains the first screen while the
+native Auth listener restores a persisted Firebase user or calls
+`signInAnonymously`. Every write helper also calls the same idempotent bootstrap,
+so a user action made before the Auth listener finishes still waits for the UID
+instead of being discarded.
+
+The Google action obtains a Google credential and calls `linkWithCredential` on
+the current anonymous Firebase user. A successful link retains the UID, so the
+Firestore document path never changes.
+
+If Firebase reports `auth/credential-already-in-use`, the app stores a durable
+account-switch marker, signs in with that credential, and activates the existing
+Google-linked account without merging the current phone's temporary data into
+it. Before replacement, a local safety snapshot is stored under the previous
+anonymous UID. This marker survives a process restart, preventing an interrupted
+account switch from accidentally merging the two accounts.
+
 ## Cloud merge
 
-On sign-in, `CloudSyncBridge` reads the user's profile, subjects, and record
-subcollections. Subjects are merged by ID. When the same dated record exists
-locally and in Firestore, the record with the newest ISO `updatedAt` value wins.
-The merged result is stored locally and then submitted to Firestore.
+On normal anonymous restoration or same-UID Google linking, `CloudSyncBridge`
+reads the user's profile, subjects, and record subcollections. Subjects are
+merged by ID. When the same dated record exists locally and in Firestore, the
+record with the newest ISO `updatedAt` value wins. The merged result is stored
+locally and then submitted to Firestore.
+
+The automatic Google recovery modal is device-local. It becomes eligible after
+three subject creations or three distinct local usage dates, marks itself shown
+before opening, and never opens automatically a second time.
 
 The manual Sync action waits for native Firestore pending writes, with a timeout
 that returns the UI to an offline state instead of blocking indefinitely.
