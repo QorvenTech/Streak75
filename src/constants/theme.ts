@@ -22,7 +22,7 @@ export const colors = {
   orange: '#FF7A1A',
   danger: '#F04444',
   absent: '#5C2632',
-  holiday: '#374555',
+  holiday: '#94A3B8',
   note: '#FFD633',
   white: '#FFFFFF',
   black: '#000000',

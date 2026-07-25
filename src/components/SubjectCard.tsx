@@ -2,7 +2,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts, radii } from '../constants/theme';
-import { ColorBand, Subject } from '../types';
+import {
+  CardAppearancePreferences,
+  ColorBand,
+  Subject,
+} from '../types';
 import { roundedAttendance } from '../utils/attendance';
 import { StatusPill } from './StatusPill';
 import { SubjectIconImage } from './SubjectIconImage';
@@ -12,10 +16,30 @@ interface SubjectCardProps {
   band: ColorBand;
   onPress?: () => void;
   preview?: boolean;
+  appearance?: CardAppearancePreferences;
 }
 
-export function SubjectCard({ subject, band, onPress, preview = false }: SubjectCardProps) {
+const defaultAppearance: CardAppearancePreferences = {
+  percentageColorMode: 'white',
+  subjectNameColorMode: 'white',
+};
+
+export function SubjectCard({
+  subject,
+  band,
+  onPress,
+  preview = false,
+  appearance = defaultAppearance,
+}: SubjectCardProps) {
   const percentage = roundedAttendance(subject.classesAttended, subject.classesHeld);
+  const percentageColor =
+    appearance.percentageColorMode === 'band' ? band.color : colors.text;
+  const subjectNameColor =
+    appearance.subjectNameColorMode === 'subject'
+      ? subject.color
+      : appearance.subjectNameColorMode === 'band'
+        ? band.color
+        : colors.text;
 
   return (
     <Pressable
@@ -38,7 +62,10 @@ export function SubjectCard({ subject, band, onPress, preview = false }: Subject
         />
       </View>
       <View style={styles.copy}>
-        <Text style={styles.name} numberOfLines={1}>
+        <Text
+          style={[styles.name, { color: subjectNameColor }]}
+          numberOfLines={1}
+        >
           {subject.name}
         </Text>
         {subject.professor ? (
@@ -50,7 +77,9 @@ export function SubjectCard({ subject, band, onPress, preview = false }: Subject
         )}
       </View>
       <View style={styles.score}>
-        <Text style={styles.percentage}>{percentage}%</Text>
+        <Text style={[styles.percentage, { color: percentageColor }]}>
+          {percentage}%
+        </Text>
         <StatusPill band={band} compact />
       </View>
       {onPress ? (
@@ -93,7 +122,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    color: colors.text,
     fontFamily: fonts.semiBold,
     fontSize: 13,
   },
@@ -108,7 +136,6 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   percentage: {
-    color: colors.text,
     fontFamily: fonts.bold,
     fontSize: 15,
   },

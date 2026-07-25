@@ -53,7 +53,7 @@ Tunnel mode may ask permission to install Expo's tunnel helper the first time.
 - Leave, Holiday, and No class states
 - Notes and local persistence
 - Bunk Meter and recovery simulator
-- Insights and color customization
+- Insights, expanded subject colors, attendance bands, and card appearance modes
 - Local daily and low-attendance notifications
 - PDF and Excel generation/share sheet
 
@@ -81,10 +81,16 @@ Expo Go cannot load native libraries that are not already compiled into it.
 9. Edit the subject spelling, faculty, icon, color, and opening totals.
 10. Restart Expo Go and confirm the subject, icon, and records remain.
 11. Compare Bunk Meter results against the corrected totals.
-12. Change target and attendance bands and verify every card.
-13. Set the reminder 2-3 minutes ahead, background Expo Go, and check delivery.
-14. Export one subject to PDF and Excel.
-15. Enable airplane mode and repeat local edits.
+12. Edit a subject and verify all 18 subject accent colors are available.
+13. Mark a date Holiday and verify the light slate status is visible in the
+    editor, legend, and calendar heatmap.
+14. Change target and attendance bands and verify every card.
+15. Under Card appearance, test white/status-colored percentages and
+    white/subject/status-colored names; verify the live preview and Home update.
+16. Restart Expo Go and verify the appearance choices persist.
+17. Set the reminder 2-3 minutes ahead, background Expo Go, and check delivery.
+18. Export one subject to PDF and Excel.
+19. Enable airplane mode and repeat local edits.
 
 ## Switch back to the launch branch
 

@@ -127,6 +127,11 @@ export function HomeScreen() {
             size={126}
             strokeWidth={11}
             color={overallBand.color}
+            valueColor={
+              settings.cardAppearance.percentageColorMode === 'band'
+                ? overallBand.color
+                : colors.text
+            }
             label={overallBand.label}
           />
           <View style={styles.metrics}>
@@ -168,6 +173,7 @@ export function HomeScreen() {
               key={subject.id}
               subject={subject}
               band={getColorBand(percentage, settings.colorBands)}
+              appearance={settings.cardAppearance}
               onPress={() => {
                 setSelectedSubjectId(subject.id);
                 navigation.navigate('SubjectDetail', { subjectId: subject.id });

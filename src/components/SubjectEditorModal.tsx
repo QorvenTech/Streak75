@@ -25,11 +25,23 @@ import { SubjectIconPickerModal } from './SubjectIconPickerModal';
 
 const subjectColors = [
   colors.lime,
-  colors.cyan,
-  colors.purple,
-  colors.warning,
-  colors.orange,
+  colors.success,
   '#47D98B',
+  '#2DD4BF',
+  colors.cyan,
+  colors.blue,
+  '#2563EB',
+  '#6366F1',
+  '#8B7CF6',
+  colors.purple,
+  '#D946EF',
+  '#EC4899',
+  colors.danger,
+  '#FF5A5F',
+  colors.orange,
+  colors.warning,
+  '#FACC15',
+  '#E2E8F0',
 ];
 
 export interface SubjectEditorInput {
@@ -484,12 +496,13 @@ const styles = StyleSheet.create({
   palette: {
     marginBottom: 18,
     flexDirection: 'row',
-    gap: 12,
+    flexWrap: 'wrap',
+    gap: 10,
   },
   swatch: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },

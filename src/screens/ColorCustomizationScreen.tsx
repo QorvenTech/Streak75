@@ -45,6 +45,17 @@ const palette = [
   '#F04444',
 ];
 
+const percentageColorOptions = [
+  { value: 'white', label: 'White' },
+  { value: 'band', label: 'Status color' },
+] as const;
+
+const subjectNameColorOptions = [
+  { value: 'white', label: 'White' },
+  { value: 'subject', label: 'Subject color' },
+  { value: 'band', label: 'Status color' },
+] as const;
+
 const dateFromTime = (time: string) => {
   const [hours = 7, minutes = 30] = time.split(':').map(Number);
   const date = new Date();
@@ -252,12 +263,119 @@ export function ColorCustomizationScreen({ navigation }: Props) {
         })}
       </View>
 
+      <Text style={styles.sectionTitle}>Card appearance</Text>
+      <Text style={styles.sectionHint}>
+        Choose where your subject and attendance colors should appear.
+      </Text>
+      <Card style={styles.appearanceCard}>
+        <Text style={styles.appearanceLabel}>Attendance percentages</Text>
+        <View style={styles.optionRow}>
+          {percentageColorOptions.map((option) => {
+            const selected =
+              settings.cardAppearance.percentageColorMode === option.value;
+            return (
+              <Pressable
+                key={option.value}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                onPress={() =>
+                  updateSettings({
+                    cardAppearance: {
+                      ...settings.cardAppearance,
+                      percentageColorMode: option.value,
+                    },
+                  })
+                }
+                style={[
+                  styles.option,
+                  selected && styles.optionSelected,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.optionDot,
+                    {
+                      backgroundColor:
+                        option.value === 'band'
+                          ? getColorBand(
+                              previewPercentage,
+                              settings.colorBands,
+                            ).color
+                          : colors.text,
+                    },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.optionText,
+                    selected && styles.optionTextSelected,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <View style={styles.appearanceDivider} />
+        <Text style={styles.appearanceLabel}>Subject names</Text>
+        <View style={styles.optionRow}>
+          {subjectNameColorOptions.map((option) => {
+            const selected =
+              settings.cardAppearance.subjectNameColorMode === option.value;
+            const previewBand = getColorBand(
+              previewPercentage,
+              settings.colorBands,
+            );
+            const dotColor =
+              option.value === 'subject'
+                ? (preview?.color ?? colors.cyan)
+                : option.value === 'band'
+                  ? previewBand.color
+                  : colors.text;
+            return (
+              <Pressable
+                key={option.value}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                onPress={() =>
+                  updateSettings({
+                    cardAppearance: {
+                      ...settings.cardAppearance,
+                      subjectNameColorMode: option.value,
+                    },
+                  })
+                }
+                style={[
+                  styles.option,
+                  selected && styles.optionSelected,
+                ]}
+              >
+                <View
+                  style={[styles.optionDot, { backgroundColor: dotColor }]}
+                />
+                <Text
+                  style={[
+                    styles.optionText,
+                    selected && styles.optionTextSelected,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </Card>
+
       <Text style={styles.sectionTitle}>Live preview</Text>
       <Card style={styles.previewCard}>
         {preview ? (
           <SubjectCard
             subject={preview}
             band={getColorBand(previewPercentage, settings.colorBands)}
+            appearance={settings.cardAppearance}
             preview
           />
         ) : (
@@ -512,6 +630,53 @@ const styles = StyleSheet.create({
   swatchActive: {
     borderWidth: 2,
     borderColor: colors.white,
+  },
+  appearanceCard: {
+    padding: 12,
+  },
+  appearanceLabel: {
+    marginBottom: 8,
+    color: colors.textSecondary,
+    fontFamily: fonts.semiBold,
+    fontSize: 10,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 7,
+  },
+  option: {
+    minHeight: 36,
+    paddingHorizontal: 10,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceSoft,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  optionSelected: {
+    borderColor: colors.cyan,
+    backgroundColor: `${colors.cyan}14`,
+  },
+  optionDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+  },
+  optionText: {
+    color: colors.muted,
+    fontFamily: fonts.medium,
+    fontSize: 9,
+  },
+  optionTextSelected: {
+    color: colors.text,
+  },
+  appearanceDivider: {
+    height: 1,
+    marginVertical: 12,
+    backgroundColor: colors.border,
   },
   previewCard: {
     padding: 10,
