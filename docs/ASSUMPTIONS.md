@@ -39,3 +39,7 @@ open. Streak75 uses the following explicit assumptions:
 14. **A manual icon choice always wins.** Name changes only refresh an
     auto-suggested icon. The user must tap **Use auto** before matching can replace
     a manually selected icon.
+15. **Card text colors are optional and global.** Attendance percentages and
+    subject names remain white by default for maximum contrast. Users can opt
+    into attendance-band or subject-accent colors, and the preference applies to
+    all Home subject cards.

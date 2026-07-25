@@ -8,6 +8,7 @@ interface CircularProgressProps {
   size?: number;
   strokeWidth?: number;
   color?: string;
+  valueColor?: string;
   label?: string;
 }
 
@@ -16,6 +17,7 @@ export function CircularProgress({
   size = 116,
   strokeWidth = 10,
   color = colors.lime,
+  valueColor = colors.text,
   label,
 }: CircularProgressProps) {
   const safePercentage = Math.max(0, Math.min(100, percentage));
@@ -50,10 +52,24 @@ export function CircularProgress({
       </Svg>
       <View style={styles.center}>
         <View style={styles.percentRow}>
-          <Text style={[styles.value, size < 100 && styles.smallValue]}>
+          <Text
+            style={[
+              styles.value,
+              { color: valueColor },
+              size < 100 && styles.smallValue,
+            ]}
+          >
             {Math.round(safePercentage)}
           </Text>
-          <Text style={[styles.symbol, size < 100 && styles.smallSymbol]}>%</Text>
+          <Text
+            style={[
+              styles.symbol,
+              { color: valueColor },
+              size < 100 && styles.smallSymbol,
+            ]}
+          >
+            %
+          </Text>
         </View>
         {label ? <Text style={styles.label}>{label}</Text> : null}
       </View>
@@ -75,14 +91,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   value: {
-    color: colors.text,
     fontFamily: fonts.bold,
     fontSize: 30,
     letterSpacing: -1.5,
   },
   symbol: {
     marginTop: 4,
-    color: colors.text,
     fontFamily: fonts.bold,
     fontSize: 14,
   },

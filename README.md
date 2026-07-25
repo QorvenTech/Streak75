@@ -21,7 +21,8 @@ up to Firestore, and exports print-ready PDF and Excel reports.
   corrections and clear-record support
 - Exact Bunk Meter inequalities for safe misses and recovery attendance
 - Combined Calendar and Smart Insights tabs
-- Editable attendance labels, thresholds, colors, global target, and live preview
+- Editable attendance labels, thresholds, colors, global target, card text color
+  modes, and live preview
 - Daily OS-scheduled local reminders and low-attendance notifications
 - Local-only use with AsyncStorage; native Firestore offline persistence when
   Google backup is connected
@@ -111,7 +112,7 @@ Streak75/
 ```text
 users/{uid}
   profile, targetAttendance, colorBands, notificationPreferences,
-  applyBandsGlobally, updatedAt
+  cardAppearance, applyBandsGlobally, updatedAt
 
 users/{uid}/subjects/{subjectId}
   name, professor, iconId, iconSelectionSource, icon, color, favorite,

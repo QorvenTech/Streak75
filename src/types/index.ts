@@ -56,10 +56,16 @@ export interface NotificationPreferences {
   lowAttendanceAlertEnabled: boolean;
 }
 
+export interface CardAppearancePreferences {
+  percentageColorMode: 'white' | 'band';
+  subjectNameColorMode: 'white' | 'subject' | 'band';
+}
+
 export interface UserSettings {
   targetPercentage: number;
   colorBands: ColorBand[];
   notifications: NotificationPreferences;
+  cardAppearance: CardAppearancePreferences;
   applyBandsGlobally: boolean;
 }
 

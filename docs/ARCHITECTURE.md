@@ -46,6 +46,15 @@ vector `icon` field as a rendering fallback. The complete subject object,
 including the final icon choice, follows the same AsyncStorage/Firestore write
 path as every other subject edit.
 
+## Card appearance
+
+`settings.cardAppearance` stores two global display preferences. Attendance
+percentages can remain white or follow their calculated attendance band. Subject
+names can remain white, follow the subject accent, or follow the attendance
+band. The Home dashboard passes these settings into every reusable
+`SubjectCard`, and the overall progress value follows the percentage preference.
+White remains the migration-safe default for existing local data.
+
 ## Attendance semantics
 
 - `present`: held +1, attended +1

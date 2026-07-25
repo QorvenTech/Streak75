@@ -18,6 +18,10 @@ export const DEFAULT_SETTINGS: UserSettings = {
     reminderTime: '07:30',
     lowAttendanceAlertEnabled: true,
   },
+  cardAppearance: {
+    percentageColorMode: 'white',
+    subjectNameColorMode: 'white',
+  },
   applyBandsGlobally: true,
 };
 
