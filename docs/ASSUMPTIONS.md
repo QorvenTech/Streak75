@@ -31,8 +31,9 @@ open. Streak75 uses the following explicit assumptions:
     only. Before App Store submission, review Apple's current login-service rule
     and add Apple Sign-In if required for the chosen distribution.
 12. **The attached composition is a style reference, not a literal screen
-    dimension.** Layouts preserve its density, navy surfaces, borders, lime/cyan
-    accents, gauges, and status hierarchy while remaining responsive on phones.
+    dimension.** Layouts preserve its white-card/light treatment and its
+    navy-card dark treatment, blue/teal/purple accents, gauges, and hierarchy
+    while remaining responsive across supported phone widths.
 13. **Starting totals are an opening balance.** They represent classes recorded
     before the student starts adding dated entries. Every dated record is applied
     on top, can be corrected atomically, and can be cleared without changing the
@@ -41,7 +42,8 @@ open. Streak75 uses the following explicit assumptions:
     auto-suggested icon. The user must tap **Use auto** before matching can replace
     a manually selected icon.
 15. **Card text colors are optional and global.** Attendance percentages and
-    subject names remain white by default for maximum contrast. Users can opt
+    subject names use the active theme's default high-contrast text color.
+    Users can opt
     into attendance-band or subject-accent colors, and the preference applies to
     all Home subject cards.
 16. **The numbered one-time-modal rule takes precedence over the earlier banner
@@ -52,3 +54,9 @@ open. Streak75 uses the following explicit assumptions:
     older Google-linked account becomes active, while this device's temporary
     anonymous session is retained as a local safety snapshot and in its original
     anonymous Firestore path.
+18. **Theme preference is device-local UI state.** Light, Dark, or System is
+    stored in a separate AsyncStorage key rather than the Firestore user model,
+    so this visual restyle does not alter attendance data or cloud schema.
+19. **Legacy icon IDs are presentation aliases.** Existing saved subjects keep
+    their stored `iconId`; rendering resolves unavailable old IDs to the closest
+    approved categorized line icon without rewriting attendance documents.

@@ -20,8 +20,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
-  userInterfaceStyle: 'dark',
-  backgroundColor: '#020B18',
+  userInterfaceStyle: 'automatic',
+  backgroundColor: '#F7F9FE',
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.qorventech.streak75',
@@ -37,7 +37,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       foregroundImage: './assets/android-icon-foreground.png',
       backgroundImage: './assets/android-icon-background.png',
       monochromeImage: './assets/android-icon-monochrome.png',
-      backgroundColor: '#020B18',
+      backgroundColor: '#F7F9FE',
     },
     predictiveBackGestureEnabled: false,
   },
@@ -51,7 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-notifications',
       {
         icon: './assets/android-icon-monochrome.png',
-        color: '#B6F20C',
+        color: '#175CFF',
         defaultChannel: 'attendance-reminders',
       },
     ],
@@ -75,9 +75,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#020B18',
+        backgroundColor: '#F7F9FE',
         image: './assets/splash-icon.png',
         imageWidth: 180,
+        dark: {
+          backgroundColor: '#030B17',
+          image: './assets/splash-icon-dark.png',
+        },
       },
     ],
     ...(hasAnyFirebaseFile

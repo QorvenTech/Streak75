@@ -1,22 +1,22 @@
 # Streak75
 
-**Hit 75. Stay Ahead.**  
-Track. Analyze. Achieve.
+**Stay on track, stress less.**
 
-Streak75 is a dark-only, offline-first attendance tracker built for Indian college
+Streak75 is a light/dark, offline-first attendance tracker built for Indian college
 students. It tracks attendance subject by subject, calculates a safe bunk
 allowance, forecasts recovery, schedules device-local reminders, backs records
 up to Firestore, and exports print-ready PDF and Excel reports.
 
 ## What is included
 
-- Prototype-matched navy UI with the lime/cyan Streak75 shield brand
+- Reference-matched blue/teal/purple UI with a circular-gradient `75` brand,
+  plus persisted Light, Dark, and System appearance modes
 - Home dashboard with weighted overall attendance, subject cards, cloud state,
   and one-tap Present/Absent/Note actions
 - Subject detail with edit/delete controls, favorite state, calendar heatmap,
   five attendance states, notes, PDF report, and Excel report
-- 110 optimized illustrated subject icons with debounced name-based suggestions,
-  Indian abbreviations, and a searchable manual picker
+- 125 paired light/dark categorized subject icons with debounced name-based
+  suggestions, Indian abbreviations, and a searchable manual picker
 - Opening attendance balances plus atomic dated records, including back-date
   corrections and clear-record support
 - Exact Bunk Meter inequalities for safe misses and recovery attendance
@@ -94,15 +94,18 @@ Streak75/
 │   ├── firestore.rules
 │   └── firestore.indexes.json
 ├── scripts/
-│   └── generate-brand-assets.mjs
+│   ├── generate-brand-assets.mjs
+│   ├── extract-themed-subject-icons.mjs
+│   └── generate-themed-subject-icon-assets.mjs
 ├── src/
 │   ├── components/              # gauges, cards, calendars, modals, settings rows
-│   ├── constants/               # dark theme and attendance status metadata
+│   ├── constants/               # theme tokens and attendance status metadata
 │   ├── data/                    # defaults and development prototype data
 │   ├── navigation/              # bottom tabs and root detail stack
 │   ├── screens/                 # all product screens
 │   ├── services/                # Firebase, sync bridge, notifications, exports
 │   ├── store/                   # offline-first application provider
+│   ├── theme/                   # persisted Light / Dark / System provider
 │   ├── types/                   # Firestore-aligned domain model
 │   └── utils/                   # calculations, dates, unit tests
 └── docs/

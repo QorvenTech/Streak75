@@ -58,8 +58,10 @@ that returns the UI to an offline state instead of blocking indefinitely.
 
 ## Subject icon selection
 
-The icon catalog contains 110 transparent 128px WebP assets plus a generic book
-fallback. `subjectIconMap.ts` normalizes case and punctuation and scores exact
+The icon catalog contains 125 approved subjects in five categories. Every icon
+has an optimized 112px light-background and dark-background WebP variant, plus
+a paired generic book fallback. `subjectIconMap.ts` normalizes case and
+punctuation and scores exact
 aliases, contained phrases, and in-progress prefixes. Add/Edit Subject debounces
 this matcher by 180ms while showing a live preview.
 
@@ -71,14 +73,28 @@ vector `icon` field as a rendering fallback. The complete subject object,
 including the final icon choice, follows the same AsyncStorage/Firestore write
 path as every other subject edit.
 
+## Theme system
+
+`ThemeProvider` resolves the persisted `light`, `dark`, or `system` preference
+to semantic color tokens. Screens and reusable components create their styles
+from those tokens at render time, so switching theme does not require a reload.
+React Navigation, the status bar, modals, cards, charts, and the subject icon
+renderer all consume the same resolved theme.
+
+The preference lives at `@streak75/theme-preference/v1` and is intentionally
+separate from `PersistedAppState` and Firestore. This keeps the restyle visual
+only and preserves the existing cloud data model.
+
 ## Card appearance
 
 `settings.cardAppearance` stores two global display preferences. Attendance
-percentages can remain white or follow their calculated attendance band. Subject
-names can remain white, follow the subject accent, or follow the attendance
+percentages can use default theme text or follow their calculated attendance
+band. Subject names can use default theme text, follow the subject accent, or
+follow the attendance
 band. The Home dashboard passes these settings into every reusable
 `SubjectCard`, and the overall progress value follows the percentage preference.
-White remains the migration-safe default for existing local data.
+The existing serialized `"white"` option remains the migration-safe internal
+value and now means default theme text in the UI.
 
 ## Attendance semantics
 
