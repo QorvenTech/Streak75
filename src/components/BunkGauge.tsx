@@ -97,7 +97,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     position: 'relative',
   },
   ringCenter: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
   },

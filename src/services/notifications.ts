@@ -37,7 +37,7 @@ async function ensureAndroidChannel(): Promise<void> {
     importance: Notifications.AndroidImportance.HIGH,
     sound: 'default',
     vibrationPattern: [0, 180, 100, 180],
-    lightColor: '#B6F20C',
+    lightColor: '#175CFF',
     enableVibrate: true,
     showBadge: false,
   });
@@ -71,7 +71,7 @@ export async function scheduleDailyReminder(
       title: 'Keep your Streak75 updated',
       body: 'Mark today’s classes while they’re fresh in your mind.',
       sound: 'default',
-      color: '#B6F20C',
+      color: '#175CFF',
       data: { destination: 'home', kind: 'daily-attendance' },
     },
     trigger: {

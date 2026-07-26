@@ -79,27 +79,28 @@ const reportHtml = (
         @page { margin: 34px; }
         * { box-sizing: border-box; }
         body { margin: 0; color: #102033; font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
-        .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 18px; border-bottom: 3px solid #B6F20C; }
-        .shield { width: 54px; height: 62px; border: 4px solid #B6F20C; border-radius: 18px 18px 24px 24px; color: #071322; font-size: 23px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
-        h1 { margin: 0; color: #071322; font-size: 25px; }
-        .tagline { margin-top: 3px; color: #2385A4; font-size: 9px; font-weight: 700; letter-spacing: 1.3px; }
+        .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 18px; border-bottom: 3px solid #175CFF; }
+        .mark { width: 58px; height: 58px; border: 5px solid #175CFF; border-right-color: #10BFA8; border-bottom-color: transparent; border-radius: 50%; color: #102A72; font-size: 25px; font-style: italic; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+        h1 { margin: 0; color: #071B59; font-size: 25px; }
+        .tagline { margin-top: 3px; color: #175CFF; font-size: 10px; font-weight: 700; }
+        .tagline strong { color: #16B86A; }
         .meta { margin: 16px 0; display: flex; justify-content: space-between; color: #5A6B7B; }
         h2 { margin: 20px 0 8px; color: #071322; font-size: 14px; text-transform: uppercase; letter-spacing: .6px; }
         table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
         tr { page-break-inside: avoid; }
-        th { background: #071322; color: white; padding: 8px 7px; text-align: left; font-size: 9px; }
+        th { background: #175CFF; color: white; padding: 8px 7px; text-align: left; font-size: 9px; }
         td { padding: 7px; border-bottom: 1px solid #D9E2EA; vertical-align: top; }
         tr:nth-child(even) td { background: #F4F7F9; }
-        .score { color: #4D8E11; font-weight: 700; }
+        .score { color: #16A765; font-weight: 700; }
         .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #D9E2EA; color: #708090; font-size: 8px; text-align: center; }
       </style>
     </head>
     <body>
       <div class="brand">
-        <div class="shield">75</div>
+        <div class="mark">75</div>
         <div>
           <h1>Streak75 · ${escapeHtml(title)}</h1>
-          <div class="tagline">HIT 75. STAY AHEAD. · TRACK. ANALYZE. ACHIEVE.</div>
+          <div class="tagline">Stay on track, <strong>stress less.</strong></div>
         </div>
       </div>
       <div class="meta">
