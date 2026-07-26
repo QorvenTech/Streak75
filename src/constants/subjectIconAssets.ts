@@ -1,117 +1,519 @@
 import type { ImageSourcePropType } from 'react-native';
 
+export interface SubjectIconAssetPair {
+  light: ImageSourcePropType;
+  dark: ImageSourcePropType;
+}
+
+/**
+ * Generated from the approved categorized Streak75 icon sheets.
+ * Run scripts/generate-themed-subject-icon-assets.mjs after re-extracting.
+ */
 export const SUBJECT_ICON_ASSETS = {
-  'generic-subject': require('../../assets/subject-icons/generic-subject.webp'),
-  mathematics: require('../../assets/subject-icons/mathematics.webp'),
-  physics: require('../../assets/subject-icons/physics.webp'),
-  chemistry: require('../../assets/subject-icons/chemistry.webp'),
-  biology: require('../../assets/subject-icons/biology.webp'),
-  'computer-science': require('../../assets/subject-icons/computer-science.webp'),
-  english: require('../../assets/subject-icons/english.webp'),
-  hindi: require('../../assets/subject-icons/hindi.webp'),
-  economics: require('../../assets/subject-icons/economics.webp'),
-  'political-science': require('../../assets/subject-icons/political-science.webp'),
-  history: require('../../assets/subject-icons/history.webp'),
-  geography: require('../../assets/subject-icons/geography.webp'),
-  sociology: require('../../assets/subject-icons/sociology.webp'),
-  psychology: require('../../assets/subject-icons/psychology.webp'),
-  philosophy: require('../../assets/subject-icons/philosophy.webp'),
-  statistics: require('../../assets/subject-icons/statistics.webp'),
-  'environmental-science': require('../../assets/subject-icons/environmental-science.webp'),
-  commerce: require('../../assets/subject-icons/commerce.webp'),
-  'business-studies': require('../../assets/subject-icons/business-studies.webp'),
-  accountancy: require('../../assets/subject-icons/accountancy.webp'),
-  sanskrit: require('../../assets/subject-icons/sanskrit.webp'),
-  'physical-education': require('../../assets/subject-icons/physical-education.webp'),
-  'general-science': require('../../assets/subject-icons/general-science.webp'),
-  'financial-accounting': require('../../assets/subject-icons/financial-accounting.webp'),
-  'cost-accounting': require('../../assets/subject-icons/cost-accounting.webp'),
-  'management-accounting': require('../../assets/subject-icons/management-accounting.webp'),
-  taxation: require('../../assets/subject-icons/taxation.webp'),
-  gst: require('../../assets/subject-icons/gst.webp'),
-  auditing: require('../../assets/subject-icons/auditing.webp'),
-  'business-law': require('../../assets/subject-icons/business-law.webp'),
-  'company-law': require('../../assets/subject-icons/company-law.webp'),
-  banking: require('../../assets/subject-icons/banking.webp'),
-  finance: require('../../assets/subject-icons/finance.webp'),
-  marketing: require('../../assets/subject-icons/marketing.webp'),
-  'human-resource-management': require('../../assets/subject-icons/human-resource-management.webp'),
-  entrepreneurship: require('../../assets/subject-icons/entrepreneurship.webp'),
-  'international-business': require('../../assets/subject-icons/international-business.webp'),
-  'e-commerce': require('../../assets/subject-icons/e-commerce.webp'),
-  'supply-chain-management': require('../../assets/subject-icons/supply-chain-management.webp'),
-  'operations-management': require('../../assets/subject-icons/operations-management.webp'),
-  'business-analytics': require('../../assets/subject-icons/business-analytics.webp'),
-  'public-administration': require('../../assets/subject-icons/public-administration.webp'),
-  'hotel-management': require('../../assets/subject-icons/hotel-management.webp'),
-  'tourism-management': require('../../assets/subject-icons/tourism-management.webp'),
-  'retail-management': require('../../assets/subject-icons/retail-management.webp'),
-  programming: require('../../assets/subject-icons/programming.webp'),
-  java: require('../../assets/subject-icons/java.webp'),
-  python: require('../../assets/subject-icons/python.webp'),
-  'c-plus-plus': require('../../assets/subject-icons/c-plus-plus.webp'),
-  'data-structures': require('../../assets/subject-icons/data-structures.webp'),
-  dbms: require('../../assets/subject-icons/dbms.webp'),
-  'operating-systems': require('../../assets/subject-icons/operating-systems.webp'),
-  'computer-networks': require('../../assets/subject-icons/computer-networks.webp'),
-  'web-development': require('../../assets/subject-icons/web-development.webp'),
-  'mobile-app-development': require('../../assets/subject-icons/mobile-app-development.webp'),
-  'artificial-intelligence': require('../../assets/subject-icons/artificial-intelligence.webp'),
-  'machine-learning': require('../../assets/subject-icons/machine-learning.webp'),
-  'cyber-security': require('../../assets/subject-icons/cyber-security.webp'),
-  'data-science': require('../../assets/subject-icons/data-science.webp'),
-  'mechanical-engineering': require('../../assets/subject-icons/mechanical-engineering.webp'),
-  'electrical-engineering': require('../../assets/subject-icons/electrical-engineering.webp'),
-  'electronics-communication': require('../../assets/subject-icons/electronics-communication.webp'),
-  'civil-engineering': require('../../assets/subject-icons/civil-engineering.webp'),
-  architecture: require('../../assets/subject-icons/architecture.webp'),
-  robotics: require('../../assets/subject-icons/robotics.webp'),
-  mechatronics: require('../../assets/subject-icons/mechatronics.webp'),
-  'automobile-engineering': require('../../assets/subject-icons/automobile-engineering.webp'),
-  botany: require('../../assets/subject-icons/botany.webp'),
-  zoology: require('../../assets/subject-icons/zoology.webp'),
-  biotechnology: require('../../assets/subject-icons/biotechnology.webp'),
-  microbiology: require('../../assets/subject-icons/microbiology.webp'),
-  biochemistry: require('../../assets/subject-icons/biochemistry.webp'),
-  anatomy: require('../../assets/subject-icons/anatomy.webp'),
-  physiology: require('../../assets/subject-icons/physiology.webp'),
-  nursing: require('../../assets/subject-icons/nursing.webp'),
-  pharmacology: require('../../assets/subject-icons/pharmacology.webp'),
-  pathology: require('../../assets/subject-icons/pathology.webp'),
-  'medical-laboratory-technology': require('../../assets/subject-icons/medical-laboratory-technology.webp'),
-  agriculture: require('../../assets/subject-icons/agriculture.webp'),
-  horticulture: require('../../assets/subject-icons/horticulture.webp'),
-  'food-technology': require('../../assets/subject-icons/food-technology.webp'),
-  'nutrition-dietetics': require('../../assets/subject-icons/nutrition-dietetics.webp'),
-  'home-science': require('../../assets/subject-icons/home-science.webp'),
-  forestry: require('../../assets/subject-icons/forestry.webp'),
-  'soil-science': require('../../assets/subject-icons/soil-science.webp'),
-  fisheries: require('../../assets/subject-icons/fisheries.webp'),
-  'veterinary-science': require('../../assets/subject-icons/veterinary-science.webp'),
-  'environmental-management': require('../../assets/subject-icons/environmental-management.webp'),
-  geology: require('../../assets/subject-icons/geology.webp'),
-  journalism: require('../../assets/subject-icons/journalism.webp'),
-  'mass-communication': require('../../assets/subject-icons/mass-communication.webp'),
-  'fine-arts': require('../../assets/subject-icons/fine-arts.webp'),
-  'graphic-design': require('../../assets/subject-icons/graphic-design.webp'),
-  'fashion-design': require('../../assets/subject-icons/fashion-design.webp'),
-  'interior-design': require('../../assets/subject-icons/interior-design.webp'),
-  animation: require('../../assets/subject-icons/animation.webp'),
-  'film-studies': require('../../assets/subject-icons/film-studies.webp'),
-  music: require('../../assets/subject-icons/music.webp'),
-  dance: require('../../assets/subject-icons/dance.webp'),
-  theatre: require('../../assets/subject-icons/theatre.webp'),
-  'library-science': require('../../assets/subject-icons/library-science.webp'),
-  archaeology: require('../../assets/subject-icons/archaeology.webp'),
-  anthropology: require('../../assets/subject-icons/anthropology.webp'),
-  linguistics: require('../../assets/subject-icons/linguistics.webp'),
-  education: require('../../assets/subject-icons/education.webp'),
-  'social-work': require('../../assets/subject-icons/social-work.webp'),
-  'rural-development': require('../../assets/subject-icons/rural-development.webp'),
-  urdu: require('../../assets/subject-icons/urdu.webp'),
-  french: require('../../assets/subject-icons/french.webp'),
-  german: require('../../assets/subject-icons/german.webp'),
-  'event-management': require('../../assets/subject-icons/event-management.webp'),
-} satisfies Record<string, ImageSourcePropType>;
+  'accountancy': {
+    light: require('../../assets/subject-icons/light/accountancy.webp'),
+    dark: require('../../assets/subject-icons/dark/accountancy.webp'),
+  },
+  'actuarial-science': {
+    light: require('../../assets/subject-icons/light/actuarial-science.webp'),
+    dark: require('../../assets/subject-icons/dark/actuarial-science.webp'),
+  },
+  'aerospace-engineering': {
+    light: require('../../assets/subject-icons/light/aerospace-engineering.webp'),
+    dark: require('../../assets/subject-icons/dark/aerospace-engineering.webp'),
+  },
+  'airline-airport-management': {
+    light: require('../../assets/subject-icons/light/airline-airport-management.webp'),
+    dark: require('../../assets/subject-icons/dark/airline-airport-management.webp'),
+  },
+  'animation': {
+    light: require('../../assets/subject-icons/light/animation.webp'),
+    dark: require('../../assets/subject-icons/dark/animation.webp'),
+  },
+  'anthropology': {
+    light: require('../../assets/subject-icons/light/anthropology.webp'),
+    dark: require('../../assets/subject-icons/dark/anthropology.webp'),
+  },
+  'archaeology': {
+    light: require('../../assets/subject-icons/light/archaeology.webp'),
+    dark: require('../../assets/subject-icons/dark/archaeology.webp'),
+  },
+  'artificial-intelligence': {
+    light: require('../../assets/subject-icons/light/artificial-intelligence.webp'),
+    dark: require('../../assets/subject-icons/dark/artificial-intelligence.webp'),
+  },
+  'auditing': {
+    light: require('../../assets/subject-icons/light/auditing.webp'),
+    dark: require('../../assets/subject-icons/dark/auditing.webp'),
+  },
+  'automobile-engineering': {
+    light: require('../../assets/subject-icons/light/automobile-engineering.webp'),
+    dark: require('../../assets/subject-icons/dark/automobile-engineering.webp'),
+  },
+  'ayurveda': {
+    light: require('../../assets/subject-icons/light/ayurveda.webp'),
+    dark: require('../../assets/subject-icons/dark/ayurveda.webp'),
+  },
+  'banking': {
+    light: require('../../assets/subject-icons/light/banking.webp'),
+    dark: require('../../assets/subject-icons/dark/banking.webp'),
+  },
+  'bba': {
+    light: require('../../assets/subject-icons/light/bba.webp'),
+    dark: require('../../assets/subject-icons/dark/bba.webp'),
+  },
+  'bcom': {
+    light: require('../../assets/subject-icons/light/bcom.webp'),
+    dark: require('../../assets/subject-icons/dark/bcom.webp'),
+  },
+  'bengali': {
+    light: require('../../assets/subject-icons/light/bengali.webp'),
+    dark: require('../../assets/subject-icons/dark/bengali.webp'),
+  },
+  'bioinformatics': {
+    light: require('../../assets/subject-icons/light/bioinformatics.webp'),
+    dark: require('../../assets/subject-icons/dark/bioinformatics.webp'),
+  },
+  'biology': {
+    light: require('../../assets/subject-icons/light/biology.webp'),
+    dark: require('../../assets/subject-icons/dark/biology.webp'),
+  },
+  'biotechnology': {
+    light: require('../../assets/subject-icons/light/biotechnology.webp'),
+    dark: require('../../assets/subject-icons/dark/biotechnology.webp'),
+  },
+  'botany': {
+    light: require('../../assets/subject-icons/light/botany.webp'),
+    dark: require('../../assets/subject-icons/dark/botany.webp'),
+  },
+  'business-analytics': {
+    light: require('../../assets/subject-icons/light/business-analytics.webp'),
+    dark: require('../../assets/subject-icons/dark/business-analytics.webp'),
+  },
+  'business-management': {
+    light: require('../../assets/subject-icons/light/business-management.webp'),
+    dark: require('../../assets/subject-icons/dark/business-management.webp'),
+  },
+  'ca': {
+    light: require('../../assets/subject-icons/light/ca.webp'),
+    dark: require('../../assets/subject-icons/dark/ca.webp'),
+  },
+  'chemical-engineering': {
+    light: require('../../assets/subject-icons/light/chemical-engineering.webp'),
+    dark: require('../../assets/subject-icons/dark/chemical-engineering.webp'),
+  },
+  'chemistry': {
+    light: require('../../assets/subject-icons/light/chemistry.webp'),
+    dark: require('../../assets/subject-icons/dark/chemistry.webp'),
+  },
+  'civil-engineering': {
+    light: require('../../assets/subject-icons/light/civil-engineering.webp'),
+    dark: require('../../assets/subject-icons/dark/civil-engineering.webp'),
+  },
+  'company-secretaryship': {
+    light: require('../../assets/subject-icons/light/company-secretaryship.webp'),
+    dark: require('../../assets/subject-icons/dark/company-secretaryship.webp'),
+  },
+  'computer-science': {
+    light: require('../../assets/subject-icons/light/computer-science.webp'),
+    dark: require('../../assets/subject-icons/dark/computer-science.webp'),
+  },
+  'constitutional-law': {
+    light: require('../../assets/subject-icons/light/constitutional-law.webp'),
+    dark: require('../../assets/subject-icons/dark/constitutional-law.webp'),
+  },
+  'corporate-law': {
+    light: require('../../assets/subject-icons/light/corporate-law.webp'),
+    dark: require('../../assets/subject-icons/dark/corporate-law.webp'),
+  },
+  'cost-works-accounting': {
+    light: require('../../assets/subject-icons/light/cost-works-accounting.webp'),
+    dark: require('../../assets/subject-icons/dark/cost-works-accounting.webp'),
+  },
+  'criminal-law': {
+    light: require('../../assets/subject-icons/light/criminal-law.webp'),
+    dark: require('../../assets/subject-icons/dark/criminal-law.webp'),
+  },
+  'criminology': {
+    light: require('../../assets/subject-icons/light/criminology.webp'),
+    dark: require('../../assets/subject-icons/dark/criminology.webp'),
+  },
+  'cyber-security': {
+    light: require('../../assets/subject-icons/light/cyber-security.webp'),
+    dark: require('../../assets/subject-icons/dark/cyber-security.webp'),
+  },
+  'data-science': {
+    light: require('../../assets/subject-icons/light/data-science.webp'),
+    dark: require('../../assets/subject-icons/dark/data-science.webp'),
+  },
+  'defense-studies': {
+    light: require('../../assets/subject-icons/light/defense-studies.webp'),
+    dark: require('../../assets/subject-icons/dark/defense-studies.webp'),
+  },
+  'dentistry': {
+    light: require('../../assets/subject-icons/light/dentistry.webp'),
+    dark: require('../../assets/subject-icons/dark/dentistry.webp'),
+  },
+  'disaster-management': {
+    light: require('../../assets/subject-icons/light/disaster-management.webp'),
+    dark: require('../../assets/subject-icons/dark/disaster-management.webp'),
+  },
+  'e-commerce': {
+    light: require('../../assets/subject-icons/light/e-commerce.webp'),
+    dark: require('../../assets/subject-icons/dark/e-commerce.webp'),
+  },
+  'economics': {
+    light: require('../../assets/subject-icons/light/economics.webp'),
+    dark: require('../../assets/subject-icons/dark/economics.webp'),
+  },
+  'education': {
+    light: require('../../assets/subject-icons/light/education.webp'),
+    dark: require('../../assets/subject-icons/dark/education.webp'),
+  },
+  'electrical-engineering': {
+    light: require('../../assets/subject-icons/light/electrical-engineering.webp'),
+    dark: require('../../assets/subject-icons/dark/electrical-engineering.webp'),
+  },
+  'electronics': {
+    light: require('../../assets/subject-icons/light/electronics.webp'),
+    dark: require('../../assets/subject-icons/dark/electronics.webp'),
+  },
+  'english': {
+    light: require('../../assets/subject-icons/light/english.webp'),
+    dark: require('../../assets/subject-icons/dark/english.webp'),
+  },
+  'english-literature': {
+    light: require('../../assets/subject-icons/light/english-literature.webp'),
+    dark: require('../../assets/subject-icons/dark/english-literature.webp'),
+  },
+  'entrepreneurship': {
+    light: require('../../assets/subject-icons/light/entrepreneurship.webp'),
+    dark: require('../../assets/subject-icons/dark/entrepreneurship.webp'),
+  },
+  'environmental-engineering': {
+    light: require('../../assets/subject-icons/light/environmental-engineering.webp'),
+    dark: require('../../assets/subject-icons/dark/environmental-engineering.webp'),
+  },
+  'environmental-science': {
+    light: require('../../assets/subject-icons/light/environmental-science.webp'),
+    dark: require('../../assets/subject-icons/dark/environmental-science.webp'),
+  },
+  'event-management': {
+    light: require('../../assets/subject-icons/light/event-management.webp'),
+    dark: require('../../assets/subject-icons/dark/event-management.webp'),
+  },
+  'fashion-design': {
+    light: require('../../assets/subject-icons/light/fashion-design.webp'),
+    dark: require('../../assets/subject-icons/dark/fashion-design.webp'),
+  },
+  'film-studies': {
+    light: require('../../assets/subject-icons/light/film-studies.webp'),
+    dark: require('../../assets/subject-icons/dark/film-studies.webp'),
+  },
+  'finance': {
+    light: require('../../assets/subject-icons/light/finance.webp'),
+    dark: require('../../assets/subject-icons/dark/finance.webp'),
+  },
+  'fine-arts': {
+    light: require('../../assets/subject-icons/light/fine-arts.webp'),
+    dark: require('../../assets/subject-icons/dark/fine-arts.webp'),
+  },
+  'fire-safety': {
+    light: require('../../assets/subject-icons/light/fire-safety.webp'),
+    dark: require('../../assets/subject-icons/dark/fire-safety.webp'),
+  },
+  'foreign-languages': {
+    light: require('../../assets/subject-icons/light/foreign-languages.webp'),
+    dark: require('../../assets/subject-icons/dark/foreign-languages.webp'),
+  },
+  'forensic-science': {
+    light: require('../../assets/subject-icons/light/forensic-science.webp'),
+    dark: require('../../assets/subject-icons/dark/forensic-science.webp'),
+  },
+  'generic-subject': {
+    light: require('../../assets/subject-icons/light/generic-subject.webp'),
+    dark: require('../../assets/subject-icons/dark/generic-subject.webp'),
+  },
+  'genetics': {
+    light: require('../../assets/subject-icons/light/genetics.webp'),
+    dark: require('../../assets/subject-icons/dark/genetics.webp'),
+  },
+  'geography': {
+    light: require('../../assets/subject-icons/light/geography.webp'),
+    dark: require('../../assets/subject-icons/dark/geography.webp'),
+  },
+  'geology': {
+    light: require('../../assets/subject-icons/light/geology.webp'),
+    dark: require('../../assets/subject-icons/dark/geology.webp'),
+  },
+  'graphic-design': {
+    light: require('../../assets/subject-icons/light/graphic-design.webp'),
+    dark: require('../../assets/subject-icons/dark/graphic-design.webp'),
+  },
+  'gst': {
+    light: require('../../assets/subject-icons/light/gst.webp'),
+    dark: require('../../assets/subject-icons/dark/gst.webp'),
+  },
+  'gujarati': {
+    light: require('../../assets/subject-icons/light/gujarati.webp'),
+    dark: require('../../assets/subject-icons/dark/gujarati.webp'),
+  },
+  'hindi': {
+    light: require('../../assets/subject-icons/light/hindi.webp'),
+    dark: require('../../assets/subject-icons/dark/hindi.webp'),
+  },
+  'hindi-literature': {
+    light: require('../../assets/subject-icons/light/hindi-literature.webp'),
+    dark: require('../../assets/subject-icons/dark/hindi-literature.webp'),
+  },
+  'history': {
+    light: require('../../assets/subject-icons/light/history.webp'),
+    dark: require('../../assets/subject-icons/dark/history.webp'),
+  },
+  'home-science': {
+    light: require('../../assets/subject-icons/light/home-science.webp'),
+    dark: require('../../assets/subject-icons/dark/home-science.webp'),
+  },
+  'hospitality-management': {
+    light: require('../../assets/subject-icons/light/hospitality-management.webp'),
+    dark: require('../../assets/subject-icons/dark/hospitality-management.webp'),
+  },
+  'hotel-management': {
+    light: require('../../assets/subject-icons/light/hotel-management.webp'),
+    dark: require('../../assets/subject-icons/dark/hotel-management.webp'),
+  },
+  'hotel-management-catering': {
+    light: require('../../assets/subject-icons/light/hotel-management-catering.webp'),
+    dark: require('../../assets/subject-icons/dark/hotel-management-catering.webp'),
+  },
+  'human-resource-management': {
+    light: require('../../assets/subject-icons/light/human-resource-management.webp'),
+    dark: require('../../assets/subject-icons/dark/human-resource-management.webp'),
+  },
+  'human-rights': {
+    light: require('../../assets/subject-icons/light/human-rights.webp'),
+    dark: require('../../assets/subject-icons/dark/human-rights.webp'),
+  },
+  'information-technology': {
+    light: require('../../assets/subject-icons/light/information-technology.webp'),
+    dark: require('../../assets/subject-icons/dark/information-technology.webp'),
+  },
+  'instrumentation-engineering': {
+    light: require('../../assets/subject-icons/light/instrumentation-engineering.webp'),
+    dark: require('../../assets/subject-icons/dark/instrumentation-engineering.webp'),
+  },
+  'insurance': {
+    light: require('../../assets/subject-icons/light/insurance.webp'),
+    dark: require('../../assets/subject-icons/dark/insurance.webp'),
+  },
+  'interior-design': {
+    light: require('../../assets/subject-icons/light/interior-design.webp'),
+    dark: require('../../assets/subject-icons/dark/interior-design.webp'),
+  },
+  'international-business': {
+    light: require('../../assets/subject-icons/light/international-business.webp'),
+    dark: require('../../assets/subject-icons/dark/international-business.webp'),
+  },
+  'journalism-mass-communication': {
+    light: require('../../assets/subject-icons/light/journalism-mass-communication.webp'),
+    dark: require('../../assets/subject-icons/dark/journalism-mass-communication.webp'),
+  },
+  'kannada': {
+    light: require('../../assets/subject-icons/light/kannada.webp'),
+    dark: require('../../assets/subject-icons/dark/kannada.webp'),
+  },
+  'law': {
+    light: require('../../assets/subject-icons/light/law.webp'),
+    dark: require('../../assets/subject-icons/dark/law.webp'),
+  },
+  'library-science': {
+    light: require('../../assets/subject-icons/light/library-science.webp'),
+    dark: require('../../assets/subject-icons/dark/library-science.webp'),
+  },
+  'linguistics': {
+    light: require('../../assets/subject-icons/light/linguistics.webp'),
+    dark: require('../../assets/subject-icons/dark/linguistics.webp'),
+  },
+  'malayalam': {
+    light: require('../../assets/subject-icons/light/malayalam.webp'),
+    dark: require('../../assets/subject-icons/dark/malayalam.webp'),
+  },
+  'marathi': {
+    light: require('../../assets/subject-icons/light/marathi.webp'),
+    dark: require('../../assets/subject-icons/dark/marathi.webp'),
+  },
+  'marine-biology': {
+    light: require('../../assets/subject-icons/light/marine-biology.webp'),
+    dark: require('../../assets/subject-icons/dark/marine-biology.webp'),
+  },
+  'marketing': {
+    light: require('../../assets/subject-icons/light/marketing.webp'),
+    dark: require('../../assets/subject-icons/dark/marketing.webp'),
+  },
+  'mathematics': {
+    light: require('../../assets/subject-icons/light/mathematics.webp'),
+    dark: require('../../assets/subject-icons/dark/mathematics.webp'),
+  },
+  'mba': {
+    light: require('../../assets/subject-icons/light/mba.webp'),
+    dark: require('../../assets/subject-icons/dark/mba.webp'),
+  },
+  'mcom': {
+    light: require('../../assets/subject-icons/light/mcom.webp'),
+    dark: require('../../assets/subject-icons/dark/mcom.webp'),
+  },
+  'mechanical-engineering': {
+    light: require('../../assets/subject-icons/light/mechanical-engineering.webp'),
+    dark: require('../../assets/subject-icons/dark/mechanical-engineering.webp'),
+  },
+  'mechatronics': {
+    light: require('../../assets/subject-icons/light/mechatronics.webp'),
+    dark: require('../../assets/subject-icons/dark/mechatronics.webp'),
+  },
+  'medical-laboratory-technology': {
+    light: require('../../assets/subject-icons/light/medical-laboratory-technology.webp'),
+    dark: require('../../assets/subject-icons/dark/medical-laboratory-technology.webp'),
+  },
+  'medicine-mbbs': {
+    light: require('../../assets/subject-icons/light/medicine-mbbs.webp'),
+    dark: require('../../assets/subject-icons/dark/medicine-mbbs.webp'),
+  },
+  'microbiology': {
+    light: require('../../assets/subject-icons/light/microbiology.webp'),
+    dark: require('../../assets/subject-icons/dark/microbiology.webp'),
+  },
+  'music': {
+    light: require('../../assets/subject-icons/light/music.webp'),
+    dark: require('../../assets/subject-icons/dark/music.webp'),
+  },
+  'nanotechnology': {
+    light: require('../../assets/subject-icons/light/nanotechnology.webp'),
+    dark: require('../../assets/subject-icons/dark/nanotechnology.webp'),
+  },
+  'nursing': {
+    light: require('../../assets/subject-icons/light/nursing.webp'),
+    dark: require('../../assets/subject-icons/dark/nursing.webp'),
+  },
+  'nutrition-dietetics': {
+    light: require('../../assets/subject-icons/light/nutrition-dietetics.webp'),
+    dark: require('../../assets/subject-icons/dark/nutrition-dietetics.webp'),
+  },
+  'operations-management': {
+    light: require('../../assets/subject-icons/light/operations-management.webp'),
+    dark: require('../../assets/subject-icons/dark/operations-management.webp'),
+  },
+  'optometry': {
+    light: require('../../assets/subject-icons/light/optometry.webp'),
+    dark: require('../../assets/subject-icons/dark/optometry.webp'),
+  },
+  'performing-arts': {
+    light: require('../../assets/subject-icons/light/performing-arts.webp'),
+    dark: require('../../assets/subject-icons/dark/performing-arts.webp'),
+  },
+  'pharmacy': {
+    light: require('../../assets/subject-icons/light/pharmacy.webp'),
+    dark: require('../../assets/subject-icons/dark/pharmacy.webp'),
+  },
+  'philosophy': {
+    light: require('../../assets/subject-icons/light/philosophy.webp'),
+    dark: require('../../assets/subject-icons/dark/philosophy.webp'),
+  },
+  'photography': {
+    light: require('../../assets/subject-icons/light/photography.webp'),
+    dark: require('../../assets/subject-icons/dark/photography.webp'),
+  },
+  'physical-education': {
+    light: require('../../assets/subject-icons/light/physical-education.webp'),
+    dark: require('../../assets/subject-icons/dark/physical-education.webp'),
+  },
+  'physics': {
+    light: require('../../assets/subject-icons/light/physics.webp'),
+    dark: require('../../assets/subject-icons/dark/physics.webp'),
+  },
+  'physiotherapy': {
+    light: require('../../assets/subject-icons/light/physiotherapy.webp'),
+    dark: require('../../assets/subject-icons/dark/physiotherapy.webp'),
+  },
+  'political-science': {
+    light: require('../../assets/subject-icons/light/political-science.webp'),
+    dark: require('../../assets/subject-icons/dark/political-science.webp'),
+  },
+  'project-management': {
+    light: require('../../assets/subject-icons/light/project-management.webp'),
+    dark: require('../../assets/subject-icons/dark/project-management.webp'),
+  },
+  'psychology': {
+    light: require('../../assets/subject-icons/light/psychology.webp'),
+    dark: require('../../assets/subject-icons/dark/psychology.webp'),
+  },
+  'public-administration': {
+    light: require('../../assets/subject-icons/light/public-administration.webp'),
+    dark: require('../../assets/subject-icons/dark/public-administration.webp'),
+  },
+  'radiology': {
+    light: require('../../assets/subject-icons/light/radiology.webp'),
+    dark: require('../../assets/subject-icons/dark/radiology.webp'),
+  },
+  'retail-management': {
+    light: require('../../assets/subject-icons/light/retail-management.webp'),
+    dark: require('../../assets/subject-icons/dark/retail-management.webp'),
+  },
+  'robotics': {
+    light: require('../../assets/subject-icons/light/robotics.webp'),
+    dark: require('../../assets/subject-icons/dark/robotics.webp'),
+  },
+  'sanskrit': {
+    light: require('../../assets/subject-icons/light/sanskrit.webp'),
+    dark: require('../../assets/subject-icons/dark/sanskrit.webp'),
+  },
+  'social-work': {
+    light: require('../../assets/subject-icons/light/social-work.webp'),
+    dark: require('../../assets/subject-icons/dark/social-work.webp'),
+  },
+  'sociology': {
+    light: require('../../assets/subject-icons/light/sociology.webp'),
+    dark: require('../../assets/subject-icons/dark/sociology.webp'),
+  },
+  'supply-chain-management': {
+    light: require('../../assets/subject-icons/light/supply-chain-management.webp'),
+    dark: require('../../assets/subject-icons/dark/supply-chain-management.webp'),
+  },
+  'tamil': {
+    light: require('../../assets/subject-icons/light/tamil.webp'),
+    dark: require('../../assets/subject-icons/dark/tamil.webp'),
+  },
+  'taxation': {
+    light: require('../../assets/subject-icons/light/taxation.webp'),
+    dark: require('../../assets/subject-icons/dark/taxation.webp'),
+  },
+  'telugu': {
+    light: require('../../assets/subject-icons/light/telugu.webp'),
+    dark: require('../../assets/subject-icons/dark/telugu.webp'),
+  },
+  'tourism-management': {
+    light: require('../../assets/subject-icons/light/tourism-management.webp'),
+    dark: require('../../assets/subject-icons/dark/tourism-management.webp'),
+  },
+  'urdu': {
+    light: require('../../assets/subject-icons/light/urdu.webp'),
+    dark: require('../../assets/subject-icons/dark/urdu.webp'),
+  },
+  'veterinary-science': {
+    light: require('../../assets/subject-icons/light/veterinary-science.webp'),
+    dark: require('../../assets/subject-icons/dark/veterinary-science.webp'),
+  },
+  'visual-communication': {
+    light: require('../../assets/subject-icons/light/visual-communication.webp'),
+    dark: require('../../assets/subject-icons/dark/visual-communication.webp'),
+  },
+  'yoga': {
+    light: require('../../assets/subject-icons/light/yoga.webp'),
+    dark: require('../../assets/subject-icons/dark/yoga.webp'),
+  },
+  'zoology': {
+    light: require('../../assets/subject-icons/light/zoology.webp'),
+    dark: require('../../assets/subject-icons/dark/zoology.webp'),
+  },
+} satisfies Record<string, SubjectIconAssetPair>;
 
 export type SubjectIconId = keyof typeof SUBJECT_ICON_ASSETS;

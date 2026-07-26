@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 
 interface MetricTileProps {
   label: string;
@@ -8,16 +9,18 @@ interface MetricTileProps {
   accent?: string;
 }
 
-export function MetricTile({ label, value, accent = colors.text }: MetricTileProps) {
+export function MetricTile({ label, value, accent }: MetricTileProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
+  const valueColor = accent ?? colors.text;
   return (
     <View style={styles.tile}>
       <Text style={styles.label}>{label}</Text>
-      <Text style={[styles.value, { color: accent }]}>{value}</Text>
+      <Text style={[styles.value, { color: valueColor }]}>{value}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   tile: {
     flex: 1,
     minHeight: 69,

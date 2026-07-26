@@ -1,7 +1,8 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 
 interface QuickActionProps {
   label: string;
@@ -11,6 +12,7 @@ interface QuickActionProps {
 }
 
 export function QuickAction({ label, icon, color, onPress }: QuickActionProps) {
+  const { styles } = useThemedStyles(createStyles);
   return (
     <Pressable
       accessibilityRole="button"
@@ -30,7 +32,7 @@ export function QuickAction({ label, icon, color, onPress }: QuickActionProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   button: {
     flex: 1,
     minWidth: 70,

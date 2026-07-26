@@ -1,12 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { STATUS_META } from '../constants/attendance';
-import { colors, fonts } from '../constants/theme';
+import { fonts, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { AttendanceStatus } from '../types';
 
 const statuses: AttendanceStatus[] = ['present', 'absent', 'leave', 'holiday'];
 
 export function AttendanceLegend() {
+  const { colors, styles } = useThemedStyles(createStyles);
   return (
     <View style={styles.legend}>
       {statuses.map((status) => (
@@ -23,7 +25,7 @@ export function AttendanceLegend() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   legend: {
     paddingVertical: 10,
     flexDirection: 'row',

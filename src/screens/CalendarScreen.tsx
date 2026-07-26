@@ -7,12 +7,14 @@ import { CalendarHeatmap } from '../components/CalendarHeatmap';
 import { Card } from '../components/Card';
 import { RecordEditorModal } from '../components/RecordEditorModal';
 import { Screen } from '../components/Screen';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { useApp } from '../store/AppProvider';
 import { getColorBand, roundedAttendance } from '../utils/attendance';
 import { shiftMonth } from '../utils/dates';
 
 export function CalendarScreen() {
+  const { colors, styles } = useThemedStyles(createStyles);
   const {
     subjects,
     selectedSubject,
@@ -118,7 +120,7 @@ export function CalendarScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   empty: {
     padding: 24,
     alignItems: 'center',

@@ -1,7 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Line, Path } from 'react-native-svg';
+import Svg, {
+  Circle,
+  Defs,
+  LinearGradient,
+  Stop,
+} from 'react-native-svg';
 
-import { colors, fonts } from '../constants/theme';
+import { fonts, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 
 interface BunkGaugeProps {
   percentage: number;
@@ -11,39 +17,6 @@ interface BunkGaugeProps {
   valueLabel: string;
 }
 
-const gaugeColors = [
-  '#53D64A',
-  '#6DDB38',
-  '#8DDF25',
-  '#B5E31C',
-  '#DCE31A',
-  '#F5D51D',
-  '#F8B41A',
-  '#FA8D19',
-  '#F76822',
-  '#F04444',
-];
-
-const polar = (cx: number, cy: number, radius: number, angle: number) => {
-  const radians = (angle * Math.PI) / 180;
-  return {
-    x: cx + radius * Math.cos(radians),
-    y: cy + radius * Math.sin(radians),
-  };
-};
-
-const arc = (
-  cx: number,
-  cy: number,
-  radius: number,
-  startAngle: number,
-  endAngle: number,
-) => {
-  const start = polar(cx, cy, radius, startAngle);
-  const end = polar(cx, cy, radius, endAngle);
-  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 0 1 ${end.x} ${end.y}`;
-};
-
 export function BunkGauge({
   percentage,
   target,
@@ -51,129 +24,127 @@ export function BunkGauge({
   value,
   valueLabel,
 }: BunkGaugeProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const safePercentage = Math.max(0, Math.min(100, percentage));
-  const width = 330;
-  const height = 197;
-  const cx = width / 2;
-  const cy = 164;
-  const radius = 135;
-  const segmentCount = 30;
-  const needleAngle = 180 + safePercentage * 1.8;
-  const needleEnd = polar(cx, cy, radius - 30, needleAngle);
-  const targetAngle = 180 + Math.max(0, Math.min(100, target)) * 1.8;
-  const targetInner = polar(cx, cy, radius - 12, targetAngle);
-  const targetOuter = polar(cx, cy, radius + 11, targetAngle);
+  const size = 158;
+  const strokeWidth = 13;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * Math.PI * 2;
+  const offset = circumference * (1 - safePercentage / 100);
 
   return (
     <View style={styles.wrapper}>
-      <Svg width={width} height={height}>
-        {Array.from({ length: segmentCount }, (_, index) => {
-          const start = 180 + (index / segmentCount) * 180 + 0.8;
-          const end = 180 + ((index + 1) / segmentCount) * 180 - 0.8;
-          const colorIndex = Math.min(
-            gaugeColors.length - 1,
-            Math.floor((index / segmentCount) * gaugeColors.length),
-          );
-          return (
-            <Path
-              key={index}
-              d={arc(cx, cy, radius, start, end)}
-              stroke={gaugeColors[colorIndex]}
-              strokeWidth={15}
-              strokeLinecap="butt"
-              fill="none"
-              opacity={index / segmentCount <= safePercentage / 100 ? 1 : 0.27}
-            />
-          );
-        })}
-        <Line
-          x1={targetInner.x}
-          y1={targetInner.y}
-          x2={targetOuter.x}
-          y2={targetOuter.y}
-          stroke={colors.white}
-          strokeWidth={3}
-        />
-        <Line
-          x1={cx}
-          y1={cy}
-          x2={needleEnd.x}
-          y2={needleEnd.y}
-          stroke={colors.white}
-          strokeWidth={4}
-          strokeLinecap="round"
-        />
-        <Circle cx={cx} cy={cy} r={10} fill={colors.text} />
-        <Circle cx={cx} cy={cy} r={4} fill={colors.faint} />
-      </Svg>
-      <Text style={styles.zero}>0%</Text>
-      <Text style={styles.hundred}>100%</Text>
-      <Text style={[styles.target, { left: `${Math.max(8, Math.min(80, target - 9))}%` }]}>
-        {target}% target
-      </Text>
-      <View style={styles.valueBlock}>
+      <View style={[styles.ring, { width: size, height: size }]}>
+        <Svg width={size} height={size}>
+          <Defs>
+            <LinearGradient id="bunk-gradient" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor={colors.gradientStart} />
+              <Stop offset="0.55" stopColor={colors.gradientEnd} />
+              <Stop offset="1" stopColor={colors.gradientMiddle} />
+            </LinearGradient>
+          </Defs>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={colors.surfaceSoft}
+            strokeWidth={strokeWidth}
+          />
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            origin={`${size / 2}, ${size / 2}`}
+            rotation="-90"
+            stroke="url(#bunk-gradient)"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            strokeWidth={strokeWidth}
+          />
+        </Svg>
+        <View style={styles.ringCenter}>
+          <Text style={styles.percentage}>{safePercentage.toFixed(1)}%</Text>
+          <Text style={styles.currentLabel}>Current attendance</Text>
+        </View>
+      </View>
+
+      <View style={styles.result}>
         <Text style={styles.headline}>{headline}</Text>
         <Text style={styles.value}>{value}</Text>
         <Text style={styles.valueLabel}>{valueLabel}</Text>
+        <View style={styles.targetPill}>
+          <Text style={styles.targetText}>Target {target}%</Text>
+        </View>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   wrapper: {
-    width: 330,
-    height: 198,
-    alignSelf: 'center',
+    width: '100%',
+    minHeight: 176,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    gap: 12,
   },
-  zero: {
-    position: 'absolute',
-    left: 8,
-    bottom: 18,
-    color: colors.textSecondary,
-    fontFamily: fonts.semiBold,
-    fontSize: 10,
+  ring: {
+    position: 'relative',
   },
-  hundred: {
-    position: 'absolute',
-    right: 1,
-    bottom: 18,
-    color: colors.textSecondary,
-    fontFamily: fonts.semiBold,
-    fontSize: 10,
+  ringCenter: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  target: {
-    position: 'absolute',
-    top: 4,
-    color: colors.textSecondary,
+  percentage: {
+    color: colors.purple,
+    fontFamily: fonts.bold,
+    fontSize: 25,
+    letterSpacing: -1,
+  },
+  currentLabel: {
+    marginTop: 1,
+    color: colors.muted,
     fontFamily: fonts.medium,
     fontSize: 8,
-  },
-  valueBlock: {
-    position: 'absolute',
-    left: 75,
-    right: 75,
-    bottom: 13,
-    alignItems: 'center',
-  },
-  headline: {
-    color: colors.textSecondary,
-    fontFamily: fonts.medium,
-    fontSize: 9,
-    letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
-  value: {
-    color: colors.text,
+  result: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headline: {
+    color: colors.success,
     fontFamily: fonts.bold,
-    fontSize: 46,
-    lineHeight: 49,
-    letterSpacing: -2,
+    fontSize: 17,
+  },
+  value: {
+    marginTop: -2,
+    color: colors.success,
+    fontFamily: fonts.bold,
+    fontSize: 42,
+    lineHeight: 46,
   },
   valueLabel: {
-    marginTop: -3,
-    color: colors.lime,
-    fontFamily: fonts.bold,
-    fontSize: 13,
+    color: colors.text,
+    fontFamily: fonts.semiBold,
+    fontSize: 10,
+  },
+  targetPill: {
+    marginTop: 9,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: colors.blueSoft,
+  },
+  targetText: {
+    color: colors.blue,
+    fontFamily: fonts.semiBold,
+    fontSize: 8.5,
   },
 });

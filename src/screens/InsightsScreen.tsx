@@ -5,7 +5,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Card } from '../components/Card';
 import { Screen } from '../components/Screen';
 import { StatusPill } from '../components/StatusPill';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { useApp } from '../store/AppProvider';
 import {
   aggregateSubjects,
@@ -15,6 +16,7 @@ import {
 } from '../utils/attendance';
 
 export function InsightsScreen() {
+  const { colors, styles } = useThemedStyles(createStyles);
   const { subjects, settings } = useApp();
   const overall = useMemo(() => aggregateSubjects(subjects), [subjects]);
   const ranked = useMemo(
@@ -184,7 +186,7 @@ export function InsightsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   empty: {
     padding: 28,
     alignItems: 'center',

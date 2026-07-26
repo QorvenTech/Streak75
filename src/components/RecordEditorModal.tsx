@@ -1,19 +1,11 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+  Alert, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View, } from 'react-native';
 
 import { STATUS_META } from '../constants/attendance';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { AttendanceRecord, AttendanceStatus } from '../types';
 import { formatFullDate } from '../utils/dates';
 
@@ -40,6 +32,7 @@ function RecordEditorContent({
   onSave,
   onDelete,
 }: RecordEditorContentProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const [status, setStatus] = useState<AttendanceStatus>(record?.status ?? 'present');
   const [note, setNote] = useState(record?.note ?? '');
 
@@ -145,6 +138,7 @@ export function RecordEditorModal({
   onSave,
   onDelete,
 }: RecordEditorModalProps) {
+  const { styles } = useThemedStyles(createStyles);
   return (
     <Modal visible={visible && !!date} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
@@ -167,7 +161,7 @@ export function RecordEditorModal({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',

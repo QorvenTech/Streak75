@@ -2,7 +2,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '../components/Screen';
-import { colors, fonts } from '../constants/theme';
+import { fonts, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 
 interface PlaceholderTabScreenProps {
   title: string;
@@ -15,6 +16,7 @@ export function PlaceholderTabScreen({
   subtitle,
   icon,
 }: PlaceholderTabScreenProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   return (
     <Screen scroll={false} contentContainerStyle={styles.container}>
       <View style={styles.icon}>
@@ -26,7 +28,7 @@ export function PlaceholderTabScreen({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',

@@ -1,7 +1,8 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import {
   CardAppearancePreferences,
   ColorBand,
@@ -17,6 +18,8 @@ interface SubjectCardProps {
   onPress?: () => void;
   preview?: boolean;
   appearance?: CardAppearancePreferences;
+  onPresent?: () => void;
+  onAbsent?: () => void;
 }
 
 const defaultAppearance: CardAppearancePreferences = {
@@ -30,7 +33,10 @@ export function SubjectCard({
   onPress,
   preview = false,
   appearance = defaultAppearance,
+  onPresent,
+  onAbsent,
 }: SubjectCardProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const percentage = roundedAttendance(subject.classesAttended, subject.classesHeld);
   const percentageColor =
     appearance.percentageColorMode === 'band' ? band.color : colors.text;
@@ -75,12 +81,58 @@ export function SubjectCard({
         ) : (
           <Text style={styles.professor}>No professor added</Text>
         )}
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              {
+                width: `${Math.max(0, Math.min(100, percentage))}%`,
+                backgroundColor: subject.color,
+              },
+            ]}
+          />
+        </View>
       </View>
       <View style={styles.score}>
         <Text style={[styles.percentage, { color: percentageColor }]}>
           {percentage}%
         </Text>
-        <StatusPill band={band} compact />
+        {onPresent && onAbsent ? (
+          <View style={styles.rowActions}>
+            <Pressable
+              accessibilityLabel={`Mark ${subject.name} present`}
+              hitSlop={4}
+              onPress={(event) => {
+                event.stopPropagation();
+                onPresent();
+              }}
+              style={[styles.rowAction, { borderColor: colors.success }]}
+            >
+              <MaterialCommunityIcons
+                name="check"
+                color={colors.success}
+                size={13}
+              />
+            </Pressable>
+            <Pressable
+              accessibilityLabel={`Mark ${subject.name} absent`}
+              hitSlop={4}
+              onPress={(event) => {
+                event.stopPropagation();
+                onAbsent();
+              }}
+              style={[styles.rowAction, { borderColor: colors.danger }]}
+            >
+              <MaterialCommunityIcons
+                name="close"
+                color={colors.danger}
+                size={13}
+              />
+            </Pressable>
+          </View>
+        ) : (
+          <StatusPill band={band} compact />
+        )}
       </View>
       {onPress ? (
         <MaterialCommunityIcons name="chevron-right" color={colors.cyan} size={20} />
@@ -89,9 +141,9 @@ export function SubjectCard({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
-    minHeight: 60,
+    minHeight: 66,
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: radii.md,
@@ -110,11 +162,11 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.995 }],
   },
   iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    borderWidth: 1,
-    backgroundColor: colors.backgroundElevated,
+    width: 42,
+    height: 42,
+    borderRadius: 11,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -131,9 +183,32 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 10,
   },
+  progressTrack: {
+    height: 3,
+    marginTop: 5,
+    borderRadius: radii.pill,
+    overflow: 'hidden',
+    backgroundColor: colors.surfaceSoft,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: radii.pill,
+  },
   score: {
     alignItems: 'flex-end',
     gap: 2,
+  },
+  rowActions: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  rowAction: {
+    width: 29,
+    height: 22,
+    borderRadius: 7,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   percentage: {
     fontFamily: fonts.bold,

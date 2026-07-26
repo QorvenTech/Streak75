@@ -1,7 +1,8 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { BrandLogo } from './BrandLogo';
 
 interface AppHeaderProps {
@@ -9,6 +10,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ onNotificationsPress }: AppHeaderProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   return (
     <View style={styles.header}>
       <View style={styles.brand}>
@@ -17,7 +19,9 @@ export function AppHeader({ onNotificationsPress }: AppHeaderProps) {
           <Text style={styles.wordmark}>
             Streak<Text style={styles.accent}>75</Text>
           </Text>
-          <Text style={styles.tagline}>HIT 75. STAY AHEAD.</Text>
+          <Text style={styles.tagline}>
+            Stay on track, <Text style={styles.taglineAccent}>stress less.</Text>
+          </Text>
         </View>
       </View>
       <Pressable
@@ -27,14 +31,14 @@ export function AppHeader({ onNotificationsPress }: AppHeaderProps) {
         onPress={onNotificationsPress}
         style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
       >
-        <MaterialCommunityIcons name="bell-outline" size={23} color={colors.text} />
+        <MaterialCommunityIcons name="bell-outline" size={22} color={colors.blue} />
         <View style={styles.notificationDot} />
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   header: {
     minHeight: 64,
     flexDirection: 'row',
@@ -54,14 +58,16 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
   },
   accent: {
-    color: colors.lime,
+    color: colors.purple,
   },
   tagline: {
-    marginTop: -1,
-    color: colors.cyan,
-    fontFamily: fonts.semiBold,
-    fontSize: 7.5,
-    letterSpacing: 1.2,
+    marginTop: -2,
+    color: colors.blue,
+    fontFamily: fonts.medium,
+    fontSize: 8,
+  },
+  taglineAccent: {
+    color: colors.success,
   },
   iconButton: {
     width: 42,
@@ -80,7 +86,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: colors.lime,
+    backgroundColor: colors.purple,
   },
   pressed: {
     opacity: 0.7,

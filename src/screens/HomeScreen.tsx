@@ -1,20 +1,12 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import {
-  CompositeNavigationProp,
-  useNavigation,
-} from '@react-navigation/native';
+  CompositeNavigationProp, useNavigation, } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { useMemo, useState } from 'react';
 import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+  Alert, Pressable, ScrollView, StyleSheet, Text, View, } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
 import { Card } from '../components/Card';
@@ -26,7 +18,8 @@ import { Screen } from '../components/Screen';
 import { SectionHeader } from '../components/SectionHeader';
 import { SubjectCard } from '../components/SubjectCard';
 import { SubjectEditorModal } from '../components/SubjectEditorModal';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { RootStackParamList, TabParamList } from '../navigation/types';
 import { useApp } from '../store/AppProvider';
 import { aggregateSubjects, getColorBand } from '../utils/attendance';
@@ -38,6 +31,7 @@ type HomeNavigation = CompositeNavigationProp<
 >;
 
 export function HomeScreen() {
+  const { colors, styles } = useThemedStyles(createStyles);
   const navigation = useNavigation<HomeNavigation>();
   const {
     subjects,
@@ -66,6 +60,15 @@ export function HomeScreen() {
   );
   const overallBand = getColorBand(totals.percentage, settings.colorBands);
   const today = toDateKey(new Date());
+  const todayRecords = subjects
+    .map((subject) => subject.records[today])
+    .filter((record) => record && record.status !== 'no-class');
+  const todayPresent = todayRecords.filter(
+    (record) => record?.status === 'present',
+  ).length;
+  const todayAbsent = todayRecords.filter(
+    (record) => record?.status === 'absent',
+  ).length;
 
   const quickMark = (status: 'present' | 'absent') => {
     if (!selectedSubject) {
@@ -147,6 +150,16 @@ export function HomeScreen() {
               <Text style={styles.metricLabel}>Subjects tracked</Text>
               <Text style={styles.metricValue}>{subjects.length}</Text>
             </View>
+            <View style={styles.todaySummary}>
+              <MaterialCommunityIcons
+                name="calendar-check-outline"
+                color={colors.purple}
+                size={14}
+              />
+              <Text style={styles.todaySummaryText}>
+                Today {todayRecords.length} · {todayPresent} P · {todayAbsent} A
+              </Text>
+            </View>
             <View style={styles.targetRow}>
               <MaterialCommunityIcons name="target" color={colors.lime} size={15} />
               <Text style={styles.targetText}>
@@ -174,6 +187,20 @@ export function HomeScreen() {
               subject={subject}
               band={getColorBand(percentage, settings.colorBands)}
               appearance={settings.cardAppearance}
+              onPresent={() => {
+                markAttendance(subject.id, today, 'present');
+                setSelectedSubjectId(subject.id);
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success,
+                ).catch(() => undefined);
+              }}
+              onAbsent={() => {
+                markAttendance(subject.id, today, 'absent');
+                setSelectedSubjectId(subject.id);
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Warning,
+                ).catch(() => undefined);
+              }}
               onPress={() => {
                 setSelectedSubjectId(subject.id);
                 navigation.navigate('SubjectDetail', { subjectId: subject.id });
@@ -309,7 +336,7 @@ export function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   summaryCard: {
     marginTop: 4,
     marginBottom: 14,
@@ -386,6 +413,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
+  },
+  todaySummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  todaySummaryText: {
+    color: colors.textSecondary,
+    fontFamily: fonts.medium,
+    fontSize: 8.5,
   },
   targetText: {
     color: colors.textSecondary,

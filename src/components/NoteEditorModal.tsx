@@ -1,16 +1,9 @@
 import { useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+  KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View, } from 'react-native';
 
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { formatFullDate } from '../utils/dates';
 
 interface NoteEditorModalProps {
@@ -28,6 +21,7 @@ export function NoteEditorModal({
   onClose,
   onSave,
 }: NoteEditorModalProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const [value, setValue] = useState(initialValue);
 
   return (
@@ -76,7 +70,7 @@ export function NoteEditorModal({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     padding: 22,

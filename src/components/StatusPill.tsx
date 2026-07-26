@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { ColorBand } from '../types';
 
 interface StatusPillProps {
@@ -9,6 +10,7 @@ interface StatusPillProps {
 }
 
 export function StatusPill({ band, compact = false }: StatusPillProps) {
+  const { styles } = useThemedStyles(createStyles);
   return (
     <View
       style={[
@@ -24,7 +26,7 @@ export function StatusPill({ band, compact = false }: StatusPillProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   pill: {
     borderRadius: radii.pill,
     borderWidth: 1,
