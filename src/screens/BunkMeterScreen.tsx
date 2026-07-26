@@ -8,7 +8,8 @@ import { BunkGauge } from '../components/BunkGauge';
 import { Card } from '../components/Card';
 import { MetricTile } from '../components/MetricTile';
 import { Screen } from '../components/Screen';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { TabParamList } from '../navigation/types';
 import { useApp } from '../store/AppProvider';
 import {
@@ -21,6 +22,7 @@ import {
 } from '../utils/attendance';
 
 export function BunkMeterScreen() {
+  const { colors, styles } = useThemedStyles(createStyles);
   const navigation =
     useNavigation<BottomTabNavigationProp<TabParamList, 'BunkMeter'>>();
   const { subjects, settings, selectedSubjectId, setSelectedSubjectId } = useApp();
@@ -118,7 +120,7 @@ export function BunkMeterScreen() {
         <BunkGauge
           percentage={percentage}
           target={target}
-          headline={aboveTarget ? 'Bunk limit left' : 'Recovery needed'}
+          headline={aboveTarget ? 'Safe to bunk' : 'Recovery needed'}
           value={aboveTarget ? missable : Number.isFinite(needed) ? needed : '∞'}
           valueLabel={aboveTarget ? 'classes' : 'classes in a row'}
         />
@@ -212,7 +214,7 @@ export function BunkMeterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   empty: {
     padding: 28,
     alignItems: 'center',

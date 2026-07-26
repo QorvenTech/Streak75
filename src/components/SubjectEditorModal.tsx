@@ -1,48 +1,39 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+  KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, } from 'react-native';
 
 import { SubjectIconId } from '../constants/subjectIconAssets';
 import {
-  getSubjectIcon,
-  suggestSubjectIcon,
-} from '../constants/subjectIconMap';
-import { colors, fonts, radii, spacing } from '../constants/theme';
+  getSubjectIcon, suggestSubjectIcon, } from '../constants/subjectIconMap';
+import { fonts, radii, spacing, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { Subject } from '../types';
 import { openingTotals } from '../utils/records';
 import { SubjectIconImage } from './SubjectIconImage';
 import { SubjectIconPickerModal } from './SubjectIconPickerModal';
 
 const subjectColors = [
-  colors.lime,
-  colors.success,
+  '#175CFF',
+  '#16B86A',
   '#47D98B',
   '#2DD4BF',
-  colors.cyan,
-  colors.blue,
+  '#0EA5E9',
+  '#3478FF',
   '#2563EB',
   '#6366F1',
   '#8B7CF6',
-  colors.purple,
+  '#9A5BFF',
   '#D946EF',
   '#EC4899',
-  colors.danger,
+  '#EF4444',
   '#FF5A5F',
-  colors.orange,
-  colors.warning,
+  '#F97316',
+  '#F59E0B',
   '#FACC15',
   '#E2E8F0',
 ];
+const DEFAULT_SUBJECT_COLOR = '#175CFF';
 
 export interface SubjectEditorInput {
   name: string;
@@ -70,6 +61,7 @@ export function SubjectEditorModal({
   onSubmit,
   onDelete,
 }: SubjectEditorModalProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const [name, setName] = useState('');
   const [professor, setProfessor] = useState('');
   const [iconId, setIconId] =
@@ -78,7 +70,7 @@ export function SubjectEditorModal({
     'auto' | 'manual'
   >('auto');
   const [pickerVisible, setPickerVisible] = useState(false);
-  const [color, setColor] = useState<string>(colors.lime);
+  const [color, setColor] = useState<string>(DEFAULT_SUBJECT_COLOR);
   const [classesHeld, setClassesHeld] = useState('');
   const [classesAttended, setClassesAttended] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +88,7 @@ export function SubjectEditorModal({
           ? (subject.iconSelectionSource ?? 'manual')
           : 'auto',
       );
-      setColor(subject?.color ?? colors.lime);
+      setColor(subject?.color ?? DEFAULT_SUBJECT_COLOR);
       setClassesHeld(opening.held ? `${opening.held}` : '');
       setClassesAttended(opening.attended ? `${opening.attended}` : '');
       setError(null);
@@ -371,7 +363,7 @@ export function SubjectEditorModal({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',

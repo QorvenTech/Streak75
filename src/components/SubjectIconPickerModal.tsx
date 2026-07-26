@@ -1,24 +1,14 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  FlatList,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+  FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  filterSubjectIcons,
-  SubjectIconDefinition,
-} from '../constants/subjectIconMap';
+  filterSubjectIcons, SUBJECT_ICON_GROUPS, SubjectIconCategoryId, SubjectIconDefinition, } from '../constants/subjectIconMap';
 import { SubjectIconId } from '../constants/subjectIconAssets';
-import { colors, fonts, radii, spacing } from '../constants/theme';
+import { fonts, radii, spacing, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { SubjectIconImage } from './SubjectIconImage';
 
 interface SubjectIconPickerModalProps {
@@ -34,16 +24,27 @@ export function SubjectIconPickerModal({
   onClose,
   onSelect,
 }: SubjectIconPickerModalProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<'all' | SubjectIconCategoryId>('all');
 
   useEffect(() => {
     if (!visible) return;
-    const timeout = setTimeout(() => setQuery(''), 0);
+    const timeout = setTimeout(() => {
+      setQuery('');
+      setCategory('all');
+    }, 0);
     return () => clearTimeout(timeout);
   }, [visible]);
 
-  const filteredIcons = useMemo(() => filterSubjectIcons(query), [query]);
+  const filteredIcons = useMemo(
+    () =>
+      filterSubjectIcons(query).filter(
+        (item) => category === 'all' || item.category === category,
+      ),
+    [category, query],
+  );
 
   const renderIcon = ({ item }: { item: SubjectIconDefinition }) => {
     const selected = item.id === selectedIconId;
@@ -91,7 +92,7 @@ export function SubjectIconPickerModal({
           <View>
             <Text style={styles.title}>Choose subject icon</Text>
             <Text style={styles.subtitle}>
-              Search 110 subjects or select the general fallback.
+              Search 125 subjects across five curated categories.
             </Text>
           </View>
           <Pressable
@@ -134,6 +135,41 @@ export function SubjectIconPickerModal({
           ) : null}
         </View>
 
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categories}
+        >
+          {[
+            { id: 'all' as const, label: 'All' },
+            ...SUBJECT_ICON_GROUPS.map((group) => ({
+              id: group.id,
+              label: group.label.split(',')[0],
+            })),
+          ].map((item) => {
+            const active = category === item.id;
+            return (
+              <Pressable
+                key={item.id}
+                onPress={() => setCategory(item.id)}
+                style={[
+                  styles.categoryChip,
+                  active && styles.categoryChipActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    active && styles.categoryTextActive,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
         <View style={styles.resultRow}>
           <Text style={styles.resultCount}>
             {filteredIcons.length} icon{filteredIcons.length === 1 ? '' : 's'}
@@ -162,7 +198,7 @@ export function SubjectIconPickerModal({
               />
               <Text style={styles.emptyTitle}>No matching icon</Text>
               <Text style={styles.emptyCopy}>
-                Try the full subject name or choose General Subject.
+                Try the full subject name or clear search to browse all categories.
               </Text>
             </View>
           }
@@ -172,7 +208,7 @@ export function SubjectIconPickerModal({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: spacing.lg,
@@ -222,6 +258,33 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontFamily: fonts.regular,
     fontSize: 13,
+  },
+  categories: {
+    paddingTop: 10,
+    paddingBottom: 2,
+    gap: 7,
+  },
+  categoryChip: {
+    minHeight: 32,
+    paddingHorizontal: 11,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryChipActive: {
+    borderColor: colors.blue,
+    backgroundColor: colors.blueSoft,
+  },
+  categoryText: {
+    color: colors.muted,
+    fontFamily: fonts.semiBold,
+    fontSize: 8.5,
+  },
+  categoryTextActive: {
+    color: colors.blue,
   },
   resultRow: {
     paddingVertical: 11,

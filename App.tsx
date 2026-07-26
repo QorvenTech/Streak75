@@ -6,14 +6,33 @@ import {
   useFonts,
 } from '@expo-google-fonts/space-grotesk';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { colors } from './src/constants/theme';
 import { GoogleBackupPromptModal } from './src/components/GoogleBackupPromptModal';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { CloudSyncBridge } from './src/services/CloudSyncBridge';
 import { AppProvider } from './src/store/AppProvider';
+import { ThemeProvider, useAppTheme } from './src/theme/ThemeProvider';
+
+function ThemedApp() {
+  const { hydrated, theme } = useAppTheme();
+
+  if (!hydrated) {
+    return <View style={{ flex: 1, backgroundColor: theme.colors.background }} />;
+  }
+
+  return (
+    <>
+      <AppProvider>
+        <CloudSyncBridge />
+        <AppNavigator />
+        <GoogleBackupPromptModal />
+      </AppProvider>
+      <StatusBar style={theme.colors.statusBar === 'dark' ? 'dark' : 'light'} />
+    </>
+  );
+}
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -24,24 +43,14 @@ export default function App() {
   });
 
   if (!fontsLoaded) {
-    return <View style={styles.splash} />;
+    return <View style={{ flex: 1, backgroundColor: '#F7F9FE' }} />;
   }
 
   return (
     <SafeAreaProvider>
-      <AppProvider>
-        <CloudSyncBridge />
-        <AppNavigator />
-        <GoogleBackupPromptModal />
-      </AppProvider>
-      <StatusBar style="light" />
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  splash: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-});

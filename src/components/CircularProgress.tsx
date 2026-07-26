@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-import { colors, fonts } from '../constants/theme';
+import { fonts, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 
 interface CircularProgressProps {
   percentage: number;
@@ -16,10 +17,13 @@ export function CircularProgress({
   percentage,
   size = 116,
   strokeWidth = 10,
-  color = colors.lime,
-  valueColor = colors.text,
+  color,
+  valueColor,
   label,
 }: CircularProgressProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
+  const progressColor = color ?? colors.blue;
+  const progressValueColor = valueColor ?? colors.text;
   const safePercentage = Math.max(0, Math.min(100, percentage));
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * Math.PI * 2;
@@ -40,7 +44,7 @@ export function CircularProgress({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={color}
+          stroke={progressColor}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           fill="none"
@@ -55,7 +59,7 @@ export function CircularProgress({
           <Text
             style={[
               styles.value,
-              { color: valueColor },
+              { color: progressValueColor },
               size < 100 && styles.smallValue,
             ]}
           >
@@ -64,7 +68,7 @@ export function CircularProgress({
           <Text
             style={[
               styles.symbol,
-              { color: valueColor },
+              { color: progressValueColor },
               size < 100 && styles.smallSymbol,
             ]}
           >
@@ -77,7 +81,7 @@ export function CircularProgress({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   svg: {
     transform: [{ rotate: '0deg' }],
   },

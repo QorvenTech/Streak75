@@ -2,7 +2,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 
 interface SettingsRowProps {
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
@@ -15,16 +16,27 @@ interface SettingsRowProps {
 
 export function SettingsRow({
   icon,
-  iconColor = colors.cyan,
+  iconColor,
   title,
   subtitle,
   onPress,
   right,
 }: SettingsRowProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
+  const resolvedIconColor = iconColor ?? colors.blue;
   const content = (
     <>
-      <View style={[styles.icon, { backgroundColor: `${iconColor}18` }]}>
-        <MaterialCommunityIcons name={icon} color={iconColor} size={21} />
+      <View
+        style={[
+          styles.icon,
+          { backgroundColor: `${resolvedIconColor}18` },
+        ]}
+      >
+        <MaterialCommunityIcons
+          name={icon}
+          color={resolvedIconColor}
+          size={21}
+        />
       </View>
       <View style={styles.copy}>
         <Text style={styles.title}>{title}</Text>
@@ -50,7 +62,7 @@ export function SettingsRow({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   row: {
     minHeight: 68,
     paddingHorizontal: 12,

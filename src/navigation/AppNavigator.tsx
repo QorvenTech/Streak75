@@ -1,5 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {
+  DefaultTheme,
   DarkTheme,
   NavigationContainer,
   Theme as NavigationTheme,
@@ -8,7 +9,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StyleSheet } from 'react-native';
 
-import { colors, fonts } from '../constants/theme';
+import { fonts, ThemeColors } from '../constants/theme';
 import { BunkMeterScreen } from '../screens/BunkMeterScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { ColorCustomizationScreen } from '../screens/ColorCustomizationScreen';
@@ -16,23 +17,12 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SubjectDetailScreen } from '../screens/SubjectDetailScreen';
+import { useAppTheme } from '../theme/ThemeProvider';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { RootStackParamList, TabParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
-
-const navigationTheme: NavigationTheme = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    primary: colors.lime,
-    background: colors.background,
-    card: colors.backgroundElevated,
-    text: colors.text,
-    border: colors.border,
-    notification: colors.danger,
-  },
-};
 
 const tabIcons: Record<
   keyof TabParamList,
@@ -42,16 +32,17 @@ const tabIcons: Record<
   BunkMeter: 'speedometer',
   Calendar: 'calendar-month-outline',
   Insights: 'chart-box-outline',
-  Profile: 'account-circle-outline',
+  Profile: 'cog-outline',
 };
 
 function MainTabs() {
+  const { colors, styles } = useThemedStyles(createStyles);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarHideOnKeyboard: true,
-        tabBarActiveTintColor: colors.lime,
+        tabBarActiveTintColor: colors.blue,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabLabel,
@@ -73,12 +64,32 @@ function MainTabs() {
       />
       <Tab.Screen name="Calendar" component={CalendarScreen} />
       <Tab.Screen name="Insights" component={InsightsScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: 'Settings' }}
+      />
     </Tab.Navigator>
   );
 }
 
 export function AppNavigator() {
+  const { theme } = useAppTheme();
+  const baseTheme = theme.dark ? DarkTheme : DefaultTheme;
+  const navigationTheme: NavigationTheme = {
+    ...baseTheme,
+    dark: theme.dark,
+    colors: {
+      ...baseTheme.colors,
+      primary: theme.colors.blue,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.text,
+      border: theme.colors.border,
+      notification: theme.colors.danger,
+    },
+  };
+
   return (
     <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -93,15 +104,25 @@ export function AppNavigator() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   tabBar: {
     position: 'absolute',
-    height: 76,
-    paddingTop: 8,
-    paddingBottom: 9,
-    backgroundColor: '#061322F7',
+    height: 72,
+    paddingTop: 7,
+    paddingBottom: 8,
+    marginHorizontal: 10,
+    marginBottom: 8,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: colors.cardShadow,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 6,
   },
   tabLabel: {
     fontFamily: fonts.medium,

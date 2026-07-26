@@ -6,22 +6,15 @@ import Slider from '@react-native-community/slider';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo, useState } from 'react';
 import {
-  Alert,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+  Alert, Platform, Pressable, StyleSheet, Switch, Text, TextInput, View, } from 'react-native';
 
 import { Card } from '../components/Card';
 import { PageHeader } from '../components/PageHeader';
 import { Screen } from '../components/Screen';
 import { SettingsRow } from '../components/SettingsRow';
 import { SubjectCard } from '../components/SubjectCard';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { RootStackParamList } from '../navigation/types';
 import {
   exportAllExcel,
@@ -35,23 +28,27 @@ import { getColorBand, roundedAttendance } from '../utils/attendance';
 type Props = NativeStackScreenProps<RootStackParamList, 'ColorCustomization'>;
 
 const palette = [
-  '#65D83A',
-  '#B6F20C',
-  '#35C5F0',
-  '#4EA9F5',
-  '#A86AF5',
-  '#F4B81F',
-  '#FF7A1A',
-  '#F04444',
+  '#16B86A',
+  '#10BFA8',
+  '#0EA5E9',
+  '#175CFF',
+  '#6366F1',
+  '#7C3AED',
+  '#A855F7',
+  '#D946EF',
+  '#EC4899',
+  '#F59E0B',
+  '#F97316',
+  '#EF4444',
 ];
 
 const percentageColorOptions = [
-  { value: 'white', label: 'White' },
+  { value: 'white', label: 'Default text' },
   { value: 'band', label: 'Status color' },
 ] as const;
 
 const subjectNameColorOptions = [
-  { value: 'white', label: 'White' },
+  { value: 'white', label: 'Default text' },
   { value: 'subject', label: 'Subject color' },
   { value: 'band', label: 'Status color' },
 ] as const;
@@ -67,6 +64,7 @@ const timeFromDate = (date: Date) =>
   `${`${date.getHours()}`.padStart(2, '0')}:${`${date.getMinutes()}`.padStart(2, '0')}`;
 
 export function ColorCustomizationScreen({ navigation }: Props) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const { settings, subjects, profile, updateSettings, resetSettings } = useApp();
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -524,7 +522,7 @@ export function ColorCustomizationScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   reset: {
     color: colors.cyan,
     fontFamily: fonts.semiBold,

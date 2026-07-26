@@ -2,7 +2,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts } from '../constants/theme';
+import { fonts, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 
 interface PageHeaderProps {
   title: string;
@@ -12,6 +13,7 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, subtitle, onBack, right }: PageHeaderProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   return (
     <View style={styles.header}>
       <View style={styles.side}>
@@ -42,7 +44,7 @@ export function PageHeader({ title, subtitle, onBack, right }: PageHeaderProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   header: {
     minHeight: 62,
     flexDirection: 'row',

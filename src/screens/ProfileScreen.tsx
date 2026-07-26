@@ -3,12 +3,21 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
-import { Alert, ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { Card } from '../components/Card';
+import { BrandLogo } from '../components/BrandLogo';
 import { Screen } from '../components/Screen';
 import { SettingsRow } from '../components/SettingsRow';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { useGoogleAccountLink } from '../hooks/useGoogleAccountLink';
 import { RootStackParamList, TabParamList } from '../navigation/types';
 import {
@@ -17,6 +26,7 @@ import {
   waitForCloudSync,
 } from '../services/cloud';
 import { useApp } from '../store/AppProvider';
+import { useAppTheme } from '../theme/ThemeProvider';
 
 type ProfileNavigation = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList, 'Profile'>,
@@ -24,8 +34,10 @@ type ProfileNavigation = CompositeNavigationProp<
 >;
 
 export function ProfileScreen() {
+  const { colors, styles } = useThemedStyles(createStyles);
   const navigation = useNavigation<ProfileNavigation>();
   const { profile, settings, subjects, updateProfile } = useApp();
+  const { mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const { googleLinkBusy, linkGoogleAccount } = useGoogleAccountLink();
   const [syncBusy, setSyncBusy] = useState(false);
 
@@ -62,8 +74,8 @@ export function ProfileScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.title}>Profile</Text>
-        <Text style={styles.subtitle}>Your attendance command centre.</Text>
+        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.subtitle}>Account, backup and app preferences.</Text>
       </View>
 
       <Card style={styles.profileCard}>
@@ -133,13 +145,60 @@ export function ProfileScreen() {
           subtitle="Customize labels, thresholds, reminders, and reports."
           onPress={() => navigation.navigate('ColorCustomization')}
         />
-        <SettingsRow
-          icon="weather-night"
-          iconColor={colors.purple}
-          title="Appearance"
-          subtitle="Dark mode is always on — focused and battery friendly."
-          right={<Text style={styles.darkOnly}>Dark only</Text>}
-        />
+        <Card style={styles.appearanceCard}>
+          <View style={styles.appearanceHeading}>
+            <View style={styles.appearanceIcon}>
+              <MaterialCommunityIcons
+                name="theme-light-dark"
+                color={colors.purple}
+                size={21}
+              />
+            </View>
+            <View style={styles.appearanceCopy}>
+              <Text style={styles.appearanceTitle}>Appearance</Text>
+              <Text style={styles.appearanceSubtitle}>
+                Choose a theme or follow your phone.
+              </Text>
+            </View>
+          </View>
+          <View style={styles.themeSelector}>
+            {(['light', 'dark', 'system'] as const).map((mode) => {
+              const active = themeMode === mode;
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  key={mode}
+                  onPress={() => setThemeMode(mode)}
+                  style={[
+                    styles.themeOption,
+                    active && styles.themeOptionActive,
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={
+                      mode === 'light'
+                        ? 'white-balance-sunny'
+                        : mode === 'dark'
+                          ? 'weather-night'
+                          : 'cellphone-cog'
+                    }
+                    color={active ? colors.white : colors.muted}
+                    size={15}
+                  />
+                  <Text
+                    style={[
+                      styles.themeOptionText,
+                      active && styles.themeOptionTextActive,
+                    ]}
+                  >
+                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Card>
       </View>
 
       <Text style={styles.sectionTitle}>Backup & sync</Text>
@@ -203,19 +262,20 @@ export function ProfileScreen() {
       </View>
 
       <View style={styles.brandFooter}>
-        <View style={styles.brandIcon}>
-          <MaterialCommunityIcons name="shield-check-outline" color={colors.lime} size={23} />
-        </View>
+        <BrandLogo size={42} />
         <View>
           <Text style={styles.brandName}>Streak75 · v1.0.0</Text>
-          <Text style={styles.brandTagline}>Track. Analyze. Achieve.</Text>
+          <Text style={styles.brandTagline}>
+            Stay on track,{' '}
+            <Text style={styles.brandTaglineAccent}>stress less.</Text>
+          </Text>
         </View>
       </View>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   header: {
     minHeight: 76,
     justifyContent: 'center',
@@ -321,10 +381,64 @@ const styles = StyleSheet.create({
   rows: {
     gap: 7,
   },
-  darkOnly: {
-    color: colors.purple,
+  appearanceCard: {
+    padding: 12,
+    gap: 11,
+  },
+  appearanceHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 11,
+  },
+  appearanceIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: radii.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.purpleSoft,
+  },
+  appearanceCopy: {
+    flex: 1,
+  },
+  appearanceTitle: {
+    color: colors.text,
     fontFamily: fonts.semiBold,
-    fontSize: 10,
+    fontSize: 12.5,
+  },
+  appearanceSubtitle: {
+    marginTop: 2,
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 9.5,
+  },
+  themeSelector: {
+    minHeight: 38,
+    padding: 3,
+    borderRadius: radii.md,
+    backgroundColor: colors.surfaceSoft,
+    flexDirection: 'row',
+    gap: 4,
+  },
+  themeOption: {
+    flex: 1,
+    minHeight: 32,
+    borderRadius: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  themeOptionActive: {
+    backgroundColor: colors.blue,
+  },
+  themeOptionText: {
+    color: colors.muted,
+    fontFamily: fonts.semiBold,
+    fontSize: 9,
+  },
+  themeOptionTextActive: {
+    color: colors.white,
   },
   brandFooter: {
     marginTop: 20,
@@ -336,24 +450,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 9,
   },
-  brandIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: `${colors.lime}12`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   brandName: {
     color: colors.textSecondary,
     fontFamily: fonts.semiBold,
     fontSize: 10,
   },
   brandTagline: {
-    color: colors.cyan,
+    color: colors.blue,
     fontFamily: fonts.medium,
     fontSize: 8,
-    letterSpacing: 0.7,
-    textTransform: 'uppercase',
+  },
+  brandTaglineAccent: {
+    color: colors.success,
   },
 });

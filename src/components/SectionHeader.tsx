@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts } from '../constants/theme';
+import { fonts, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 
 interface SectionHeaderProps {
   title: string;
@@ -13,6 +14,7 @@ export function SectionHeader({
   actionLabel,
   onActionPress,
 }: SectionHeaderProps) {
+  const { styles } = useThemedStyles(createStyles);
   return (
     <View style={styles.row}>
       <Text style={styles.title}>{title}</Text>
@@ -25,7 +27,7 @@ export function SectionHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   row: {
     minHeight: 30,
     flexDirection: 'row',

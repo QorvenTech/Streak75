@@ -2,7 +2,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { STATUS_META } from '../constants/attendance';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { Subject } from '../types';
 import { getCalendarDays, monthTitle } from '../utils/dates';
 
@@ -23,6 +24,7 @@ export function CalendarHeatmap({
   onNextMonth,
   onDayPress,
 }: CalendarHeatmapProps) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const days = getCalendarDays(month);
 
   return (
@@ -66,26 +68,32 @@ export function CalendarHeatmap({
               style={({ pressed }) => [
                 styles.day,
                 !day.inCurrentMonth && styles.outsideDay,
-                statusColor
-                  ? {
-                      borderColor: `${statusColor}AA`,
-                      backgroundColor: `${statusColor}34`,
-                    }
-                  : undefined,
-                day.isToday && styles.today,
                 pressed && styles.pressed,
               ]}
             >
-              <Text
+              <View
                 style={[
-                  styles.dayText,
-                  !day.inCurrentMonth && styles.outsideText,
-                  statusColor && { color: colors.text },
+                  styles.dayBubble,
+                  statusColor
+                    ? {
+                        borderColor: statusColor,
+                        backgroundColor: `${statusColor}2E`,
+                      }
+                    : undefined,
+                  day.isToday && styles.today,
                 ]}
               >
-                {day.day}
-              </Text>
-              {record?.note ? <View style={styles.noteDot} /> : null}
+                <Text
+                  style={[
+                    styles.dayText,
+                    !day.inCurrentMonth && styles.outsideText,
+                    statusColor && { color: colors.text },
+                  ]}
+                >
+                  {day.day}
+                </Text>
+                {record?.note ? <View style={styles.noteDot} /> : null}
+              </View>
             </Pressable>
           );
         })}
@@ -94,7 +102,7 @@ export function CalendarHeatmap({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   monthHeader: {
     minHeight: 42,
     flexDirection: 'row',
@@ -126,15 +134,20 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    rowGap: 6,
+    rowGap: 2,
   },
   day: {
-    width: '13.428%',
-    aspectRatio: 1.08,
-    maxHeight: 45,
+    width: '14.285%',
+    height: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayBubble: {
+    width: 32,
+    height: 32,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
+    borderRadius: radii.pill,
     backgroundColor: colors.surfaceSoft,
     alignItems: 'center',
     justifyContent: 'center',

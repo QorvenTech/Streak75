@@ -1,20 +1,16 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+  ActivityIndicator, Modal, Pressable, StyleSheet, Text, View, } from 'react-native';
 
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { useGoogleAccountLink } from '../hooks/useGoogleAccountLink';
 import { useApp } from '../store/AppProvider';
 import { shouldShowGoogleBackupPrompt } from '../utils/googleBackupPrompt';
 
 export function GoogleBackupPromptModal() {
+  const { colors, styles } = useThemedStyles(createStyles);
   const {
     hydrated,
     profile,
@@ -115,7 +111,7 @@ export function GoogleBackupPromptModal() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     padding: 24,

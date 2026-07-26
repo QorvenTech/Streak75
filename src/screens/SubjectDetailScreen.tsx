@@ -1,25 +1,20 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+  ActivityIndicator, Alert, Pressable, StyleSheet, Text, View, } from 'react-native';
 
 import { AttendanceLegend } from '../components/AttendanceLegend';
 import { CalendarHeatmap } from '../components/CalendarHeatmap';
 import { Card } from '../components/Card';
-import { CircularProgress } from '../components/CircularProgress';
 import { PageHeader } from '../components/PageHeader';
 import { RecordEditorModal } from '../components/RecordEditorModal';
 import { Screen } from '../components/Screen';
 import { SectionHeader } from '../components/SectionHeader';
 import { SubjectEditorModal } from '../components/SubjectEditorModal';
-import { colors, fonts, radii } from '../constants/theme';
+import { fonts, radii, ThemeColors } from '../constants/theme';
+import { useThemedStyles } from '../theme/useThemedStyles';
 import { RootStackParamList } from '../navigation/types';
 import {
   exportSubjectExcel,
@@ -32,6 +27,7 @@ import { formatShortDate, shiftMonth, toDateKey } from '../utils/dates';
 type Props = NativeStackScreenProps<RootStackParamList, 'SubjectDetail'>;
 
 export function SubjectDetailScreen({ navigation, route }: Props) {
+  const { colors, styles } = useThemedStyles(createStyles);
   const {
     subjects,
     settings,
@@ -132,36 +128,36 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
         }
       />
 
-      <Card style={styles.summary}>
-        <CircularProgress
-          percentage={percentage}
-          size={126}
-          strokeWidth={11}
-          color={band.color}
-          label={band.label}
-        />
+      <LinearGradient
+        colors={['#6E3FEA', '#8A58EF', '#6540D9']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.summary}
+      >
+        <View style={styles.attendanceSummary}>
+          <Text style={styles.summaryLabel}>Current attendance</Text>
+          <Text style={styles.summaryPercentage}>{percentage}%</Text>
+          <Text style={styles.summaryBand}>
+            {band.label} · Target {settings.targetPercentage}%
+          </Text>
+        </View>
         <View style={styles.stats}>
           <View style={styles.statRow}>
-            <Text style={styles.statLabel}>Classes attended</Text>
-            <Text style={styles.statValue}>
-              {subject.classesAttended}
-              <Text style={styles.statMuted}> / {subject.classesHeld}</Text>
-            </Text>
+            <Text style={styles.statLabel}>Classes held</Text>
+            <Text style={styles.statValue}>{subject.classesHeld}</Text>
           </View>
           <View style={styles.line} />
           <View style={styles.statRow}>
-            <Text style={styles.statLabel}>Bunked / leave</Text>
+            <Text style={styles.statLabel}>Classes attended</Text>
+            <Text style={styles.statValue}>{subject.classesAttended}</Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.statRow}>
+            <Text style={styles.statLabel}>Classes absent</Text>
             <Text style={styles.statValue}>{bunked}</Text>
           </View>
-          <View style={styles.line} />
-          <View style={styles.statRow}>
-            <Text style={styles.statLabel}>Target</Text>
-            <Text style={[styles.statValue, { color: colors.lime }]}>
-              {settings.targetPercentage}%
-            </Text>
-          </View>
         </View>
-      </Card>
+      </LinearGradient>
 
       <AttendanceLegend />
       <Card style={styles.calendarCard}>
@@ -289,7 +285,7 @@ export function SubjectDetailScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   missing: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -315,10 +311,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   summary: {
+    minHeight: 126,
     padding: 14,
+    borderRadius: radii.lg,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 18,
+  },
+  attendanceSummary: {
+    width: 137,
+    paddingRight: 12,
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(255,255,255,0.22)',
+  },
+  summaryLabel: {
+    color: 'rgba(255,255,255,0.82)',
+    fontFamily: fonts.medium,
+    fontSize: 9,
+  },
+  summaryPercentage: {
+    marginTop: 5,
+    color: colors.white,
+    fontFamily: fonts.bold,
+    fontSize: 34,
+    letterSpacing: -1.5,
+  },
+  summaryBand: {
+    marginTop: 2,
+    color: 'rgba(255,255,255,0.86)',
+    fontFamily: fonts.medium,
+    fontSize: 8,
   },
   stats: {
     flex: 1,
@@ -330,22 +352,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statLabel: {
-    color: colors.muted,
+    color: 'rgba(255,255,255,0.76)',
     fontFamily: fonts.medium,
     fontSize: 10,
   },
   statValue: {
-    color: colors.text,
+    color: colors.white,
     fontFamily: fonts.bold,
     fontSize: 16,
   },
-  statMuted: {
-    color: colors.muted,
-    fontSize: 10,
-  },
   line: {
     height: 1,
-    backgroundColor: colors.border,
+    backgroundColor: 'rgba(255,255,255,0.18)',
   },
   calendarCard: {
     marginBottom: 13,
